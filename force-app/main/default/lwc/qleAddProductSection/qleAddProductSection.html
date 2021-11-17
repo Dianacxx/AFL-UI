@@ -1,0 +1,73 @@
+<template>
+    <lightning-card>
+        <span class="slds-page-header__title slds-truncate">
+            <h2 class="slds-text-heading_large slds-m-left_large">Add Products</h2>
+        </span>
+        <div class="slds-grid slds-gutters">
+            <div class="slds-col slds-size_1-of-2 slds-align_absolute-center">
+                <lightning-input  class="slds-m-right_small  slds-m-left_small" type="number" name="input6" label="Number field " value="0.5" formatter="percent" step="0.01"></lightning-input>
+                <c-qle-filter-combobox class="slds-var-p-right_medium slds-var-m-bottom_medium"></c-qle-filter-combobox>
+                <div class="slds-var-m-top_large slds-var-p-right_medium">
+                    <!--PUT FUNCTION HERE TO APPLY DISCOUNT-->
+                    <lightning-button variant="brand" label="Apply"></lightning-button>
+                </div> 
+            </div>
+            <div class="slds-col slds-size_1-of-2"> <!-- Button group -->
+                    <div class="slds-align_absolute-center"> 
+                        <!--PUT FUNCTION HERE TO OPEN POPUP TO REORDER-->
+                        <lightning-button class="slds-m-right_small" variant="brand" label="Reorder Lines" onclick={openModal}></lightning-button>
+                        <!--PUT FUNCTION HERE TO SAVE INFROAMTION AND CALCULATE VALUES-->
+                        <lightning-button class="slds-m-right_small" variant="brand-outline" label="Save & Calculate"></lightning-button>
+                        <!--PUT FUNCTION HERE TO SAVE AND NAVIGATE TO RECORD PAGE-->
+                        <lightning-button variant="brand" label="Save & Exit" icon-name="utility:save"></lightning-button>
+                    </div>
+                <div class="slds-align_absolute-center slds-m-top_small">
+                    <br/>
+                        <!--PUT FUNCTION HERE TO OPEN PRODUCT SELECTION-->
+                        <lightning-button variant="brand-outline" class="slds-m-right_small" label="Product Selection"  onclick={navitageToLWCWithoutAura}></lightning-button>
+                        <!--PUT FUNCTION HERE TO CLONE SELECTED VALUES-->
+                        <lightning-button variant="brand-outline" label="Clone Selected"></lightning-button>
+                    <br/>
+                    </div>
+                <div class="slds-align_absolute-center slds-m-top_small">
+                    <br/>
+                    <h1 class="slds-text-heading_medium slds-m-center_medium">
+                         <!--CHANGE totalQuote VALUE CALLING APEX METHOD (THIS ONE IS CACHEABLE)-->
+                    Quote Total: <lightning-formatted-number value={totalQuote.data} format-style="currency" currency-code="USD"></lightning-formatted-number></h1>
+                </div>
+            </div>
+        </div>
+        <!--POP UP TO REORDER LINES-->
+        <template if:true={isModalOpen}>
+            <!-- Modal/Popup Box LWC starts here -->
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <!-- Modal/Popup Box LWC header here -->
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                            <lightning-icon icon-name="utility:close"
+                                alternative-text="close"
+                                variant="inverse"
+                                size="small" ></lightning-icon>
+                            <span class="slds-assistive-text">Close</span>
+                        </button>
+                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Modal/PopUp Box header LWC</h2>
+                    </header>
+                    <!-- Modal/Popup Box LWC body starts here -->
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                        <p><b>Modals/Popup Box are used to display content in a layer above the app.
+                        </b></p>
+                        <p><b>This paradigm is used in cases such as the creation or editing of a record, as well as various types of messaging and wizards.
+                        </b></p>
+                    </div>
+                    <!-- Modal/Popup Box LWC footer starts here -->
+                    <footer class="slds-modal__footer">
+                        <button class="slds-button slds-button_neutral" onclick={closeModal} title="Cancel">Cancel</button>
+                        <button class="slds-button slds-button_brand" onclick={submitDetails} title="OK">OK</button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+    </lightning-card>
+</template>
