@@ -11,7 +11,7 @@ public with sharing class SampleLookupController {
             FIND :searchTerm
             IN ALL FIELDS
             RETURNING
-                Contact(Id, FirstName, Email WHERE id NOT IN :selectedIds),
+                Product2(Id, Name, Family WHERE id NOT IN :selectedIds),
                 Opportunity(Id, Name, StageName WHERE id NOT IN :selectedIds)
             LIMIT :MAX_RESULTS
         ];
@@ -19,12 +19,12 @@ public with sharing class SampleLookupController {
         // Prepare results
         List<LookupSearchResult> results = new List<LookupSearchResult>();
 
-        // Extract Contacts & convert them into LookupSearchResult
-        String contactIcon = 'standard:contact';
-        Contact[] contacts = (List<Contact>) searchResults[0];
-        for (Contact contact : contacts) {
-            String subtitle = contact.Email == null ? 'Contact' : 'Contact • ' + contact.Email;
-            results.add(new LookupSearchResult(contact.Id, 'Contact', contactIcon, contact.FirstName, subtitle));
+        // Extract Product2s & convert them into LookupSearchResult
+        String product2Icon = 'standard:products';
+        Product2[] product2s = (List<Product2>) searchResults[0];
+        for (Product2 product2 : product2s) {
+            String subtitle = product2.Family == null ? 'Product2' : 'Product2 • ' + product2.Family;
+            results.add(new LookupSearchResult(product2.Id, 'Product2', product2Icon, product2.Name, subtitle));
         }
 
         // Extract Opportunities & convert them into LookupSearchResult
@@ -51,24 +51,24 @@ public with sharing class SampleLookupController {
     @AuraEnabled(Cacheable=true)
     public static List<LookupSearchResult> getRecentlyViewed() {
         List<LookupSearchResult> results = new List<LookupSearchResult>();
-        // Get recently viewed records of type Contact or Opportunity
+        // Get recently viewed records of type Product2 or Opportunity
         List<RecentlyViewed> recentRecords = [
             SELECT Id, Name, Type
             FROM RecentlyViewed
-            WHERE Type = 'Contact' OR Type = 'Opportunity'
+            WHERE Type = 'Product2' OR Type = 'Opportunity'
             ORDER BY LastViewedDate DESC
             LIMIT 5
         ];
         // Convert recent records into LookupSearchResult
         for (RecentlyViewed recentRecord : recentRecords) {
-            if (recentRecord.Type == 'Contact') {
+            if (recentRecord.Type == 'Product2') {
                 results.add(
                     new LookupSearchResult(
                         recentRecord.Id,
-                        'Contact',
-                        'standard:contact',
+                        'Product2',
+                        'standard:products',
                         recentRecord.Name,
-                        'Contact • ' + recentRecord.Name
+                        'Product2 • ' + recentRecord.Name
                     )
                 );
             } else {
@@ -86,5 +86,6 @@ public with sharing class SampleLookupController {
         return results;
     }
 }
+
 
 
