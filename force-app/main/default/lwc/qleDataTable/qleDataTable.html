@@ -1,0 +1,17 @@
+<template>
+
+    <template for:each={quoteLines} for:item="keyValue">
+        <tr key={keyValue.key}>
+            <th scope="col">
+                <div>{keyValue.key}</div>
+            </th>
+            <th scope="col">
+                <div>{keyValue.value}</div>
+            </th>
+        </tr>
+    </template>
+    {datos}
+<!--
+    <lightning-datatable key-field="id" data={data} columns={columns}></lightning-datatable>
+-->
+</template>

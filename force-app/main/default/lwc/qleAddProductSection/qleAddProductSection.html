@@ -19,7 +19,7 @@
                         <!--PUT FUNCTION HERE TO SAVE INFROAMTION AND CALCULATE VALUES-->
                         <lightning-button class="slds-m-right_small" variant="brand-outline" label="Save & Calculate"></lightning-button>
                         <!--PUT FUNCTION HERE TO SAVE AND NAVIGATE TO RECORD PAGE-->
-                        <lightning-button variant="brand" label="Save & Exit" icon-name="utility:save"></lightning-button>
+                        <lightning-button variant="brand" label="Save & Exit" icon-name="utility:save" onclick={navigateToQuoteRecordPage}></lightning-button>
                     </div>
                 <div class="slds-align_absolute-center slds-m-top_small">
                     <br/>
@@ -37,7 +37,8 @@
                 </div>
             </div>
         </div>
-        <!--POP UP TO REORDER LINES-->
+
+        <!--START POP UP TO REORDER LINES-->
         <template if:true={isModalOpen}>
             <!-- Modal/Popup Box LWC starts here -->
             <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
@@ -51,23 +52,21 @@
                                 size="small" ></lightning-icon>
                             <span class="slds-assistive-text">Close</span>
                         </button>
-                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Modal/PopUp Box header LWC</h2>
+                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Reorder Lines of products</h2>
                     </header>
                     <!-- Modal/Popup Box LWC body starts here -->
                     <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                        <p><b>Modals/Popup Box are used to display content in a layer above the app.
-                        </b></p>
-                        <p><b>This paradigm is used in cases such as the creation or editing of a record, as well as various types of messaging and wizards.
-                        </b></p>
+                        <p><b>Here goes the table with reorder lines options</b></p>
                     </div>
                     <!-- Modal/Popup Box LWC footer starts here -->
                     <footer class="slds-modal__footer">
                         <button class="slds-button slds-button_neutral" onclick={closeModal} title="Cancel">Cancel</button>
-                        <button class="slds-button slds-button_brand" onclick={submitDetails} title="OK">OK</button>
+                        <button class="slds-button slds-button_brand" onclick={submitDetails} title="OK">Save</button>
                     </footer>
                 </div>
             </section>
             <div class="slds-backdrop slds-backdrop_open"></div>
         </template>
+        <!--END POP UP TO REORDER LINES-->
     </lightning-card>
 </template>

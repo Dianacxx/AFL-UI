@@ -1,7 +1,6 @@
 <template>
     <div class={getFormElementClass}>
         <label if:true={label} class={getLabelClass} for="combobox">
-            <abbr if:true={required} title="required" class="slds-required">*</abbr>
             {label}
         </label>
         <div class="slds-form-element__control">

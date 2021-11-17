@@ -11,8 +11,7 @@ public with sharing class SampleLookupController {
             FIND :searchTerm
             IN ALL FIELDS
             RETURNING
-                Product2(Id, Name, Family WHERE id NOT IN :selectedIds),
-                Opportunity(Id, Name, StageName WHERE id NOT IN :selectedIds)
+                Product2(Id, Name, Family WHERE id NOT IN :selectedIds)
             LIMIT :MAX_RESULTS
         ];
 
@@ -27,25 +26,10 @@ public with sharing class SampleLookupController {
             results.add(new LookupSearchResult(product2.Id, 'Product2', product2Icon, product2.Name, subtitle));
         }
 
-        // Extract Opportunities & convert them into LookupSearchResult
-        String opptyIcon = 'standard:opportunity';
-        Opportunity[] opptys = (List<Opportunity>) searchResults[1];
-        for (Opportunity oppty : opptys) {
-            results.add(
-                new LookupSearchResult(
-                    oppty.Id,
-                    'Opportunity',
-                    opptyIcon,
-                    oppty.Name,
-                    'Opportunity • ' + oppty.StageName
-                )
-            );
-        }
-
-        // Optionnaly sort all results on title
         results.sort();
 
         return results;
+
     }
 
     @AuraEnabled(Cacheable=true)
@@ -55,7 +39,7 @@ public with sharing class SampleLookupController {
         List<RecentlyViewed> recentRecords = [
             SELECT Id, Name, Type
             FROM RecentlyViewed
-            WHERE Type = 'Product2' OR Type = 'Opportunity'
+            WHERE Type = 'Product2' 
             ORDER BY LastViewedDate DESC
             LIMIT 5
         ];
@@ -71,17 +55,7 @@ public with sharing class SampleLookupController {
                         'Product2 • ' + recentRecord.Name
                     )
                 );
-            } else {
-                results.add(
-                    new LookupSearchResult(
-                        recentRecord.Id,
-                        'Opportunity',
-                        'standard:opportunity',
-                        recentRecord.Name,
-                        'Opportunity • ' + recentRecord.Name
-                    )
-                );
-            }
+            } 
         }
         return results;
     }

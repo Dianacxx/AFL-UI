@@ -24,13 +24,25 @@ export default class QleAddProductSection extends NavigationMixin(LightningEleme
         this.isModalOpen = false;
     }
 
+    //NAVIGATE TO QUOTE RECORD PAGE (MISSING SAVING INFORMATION)
+    navigateToQuoteRecordPage() {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: this.recordId,
+                objectApiName: this.objectApiName,
+                actionName: 'view'
+            },
+        });
+    }
+
     //NAVIGATION TO PRODUCT SELECTION PAGE
     navitageToLWCWithoutAura(event) {
         event.preventDefault();
         let componentDef = {
             componentDef: "c:uiProductSelection",
             attributes: {
-                label: 'Navigated From Another LWC Without Using Aura'
+                recordId: '$recordId'
             }
         };
         // Encode the componentDefinition JS object to Base64 format to make it url addressable

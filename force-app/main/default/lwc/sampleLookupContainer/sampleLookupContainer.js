@@ -25,12 +25,9 @@ export default class SampleLookupContainer extends LightningElement {
     recentlyViewed = [];
     newRecordOptions = [
         { value: 'Product2', label: 'New Product' },
-        { value: 'Opportunity', label: 'New Opportunity' }
     ];
 
-    /**
-     * Loads recently viewed records and set them as default lookpup search results (optional)
-     */
+    //Loads recently viewed records and set them as default lookpup search results (optional)
     @wire(getRecentlyViewed)
     getRecentlyViewed({ data }) {
         if (data) {
@@ -43,9 +40,8 @@ export default class SampleLookupContainer extends LightningElement {
         this.initLookupDefaultResults();
     }
 
-    /**
-     * Initializes the lookup default results with a list of recently viewed records (optional)
-     */
+    
+    //Initializes the lookup default results with a list of recently viewed records (optional)
     initLookupDefaultResults() {
         // Make sure that the lookup is present and if so, set its default results
         const lookup = this.template.querySelector('c-lookup');
@@ -54,7 +50,7 @@ export default class SampleLookupContainer extends LightningElement {
         }
     }
 
-    /**
+    /* 
      * Handles the lookup search event.
      * Calls the server to perform the search and returns the resuls to the lookup.
      * @param {event} event `search` event emmitted by the lookup
@@ -74,7 +70,7 @@ export default class SampleLookupContainer extends LightningElement {
             });
     }
 
-    /**
+    /*
      * Handles the lookup selection change
      * @param {event} event `selectionchange` event emmitted by the lookup.
      * The event contains the list of selected ids.
@@ -85,7 +81,6 @@ export default class SampleLookupContainer extends LightningElement {
     }
 
     // All functions below are part of the sample app form (not required by the lookup).
-
     handleLookupTypeChange(event) {
         this.initialSelection = [];
         this.errors = [];
@@ -100,6 +95,7 @@ export default class SampleLookupContainer extends LightningElement {
         this.checkForErrors();
         if (this.errors.length === 0) {
             this.notifyUser('Success', 'The form was submitted.', 'success');
+            
         }
     }
 

@@ -19,4 +19,20 @@ public with sharing class QuoteInformation {
         Decimal Amount = quoteRetrieve[0].SBQQ__ListAmount__c; 
         return Amount; 
     }
+
+    @AuraEnabled(cacheable=true)
+    public static Map<Integer, List<SBQQ__QuoteLine__c>> printQuoteLines(String quoteId){
+        List<SBQQ__QuoteLine__c> quoteLines = [Select Name, SBQQ__ProductSubscriptionType__c From SBQQ__QuoteLine__c Where SBQQ__Quote__c =:quoteId]; 
+        Integer columns = 1; 
+        Map<Integer, List<SBQQ__QuoteLine__c>> Mapa = new Map<Integer,List<SBQQ__QuoteLine__c>>();
+        if (columns == 1){
+            Mapa.put(columns,quoteLines);
+            return Mapa; 
+        }
+        else {
+            return null; 
+        }
+    }
+    
+    
 }
