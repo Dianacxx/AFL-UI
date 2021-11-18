@@ -28,6 +28,7 @@ export default class QleDataTable extends LightningElement {
     @track aux2 = 0; 
 
 
+
     @wire(printQuoteLines, { quoteId: '$recordId'})
     wiredSeatList({error,data}) {
         if (data) {
@@ -55,6 +56,8 @@ export default class QleDataTable extends LightningElement {
         this.aux2 += 1; 
         this.addVariable = 'Added'; 
     }
+
+    
 
 
 }
