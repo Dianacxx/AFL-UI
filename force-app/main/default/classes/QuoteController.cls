@@ -22,6 +22,7 @@ public with sharing class QuoteController {
         System.debug(displayQuoteLine.size());
         return displayQuoteLine;
     }
+    } 
     @AuraEnabled(cacheable=true)
     public static void addQuoteLine(String quoteId) {
         QuoteReader quoteReader = new QuoteReader();

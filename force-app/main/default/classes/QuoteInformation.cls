@@ -23,9 +23,15 @@ public with sharing class QuoteInformation {
     @AuraEnabled(cacheable=true)
     public static Map<Integer, List<SBQQ__QuoteLine__c>> printQuoteLines(String quoteId){
         List<SBQQ__QuoteLine__c> quoteLines = [Select Name, SBQQ__ProductSubscriptionType__c From SBQQ__QuoteLine__c Where SBQQ__Quote__c =:quoteId]; 
+<<<<<<< HEAD
         Integer columns = 2; //To change columns depending data 
         Map<Integer, List<SBQQ__QuoteLine__c>> Mapa = new Map<Integer,List<SBQQ__QuoteLine__c>>();
         if (columns == 2){
+=======
+        Integer columns = 1; 
+        Map<Integer, List<SBQQ__QuoteLine__c>> Mapa = new Map<Integer,List<SBQQ__QuoteLine__c>>();
+        if (columns == 1){
+>>>>>>> 10f8f92fb9dea53f4644f456911e794241e44160
             Mapa.put(columns,quoteLines);
             return Mapa; 
         }

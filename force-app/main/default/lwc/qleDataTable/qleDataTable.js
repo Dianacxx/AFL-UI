@@ -40,8 +40,9 @@ export default class QleDataTable extends LightningElement {
                if (this.aux == 1){this.columns = COLUMNS;}
                else {this.columns = COLUMNS2;} //Depending key, it shows, columns names. 
             }
-
-        } else if (error) {
+               this.aux = key; 
+        }
+        else if (error) {
             window.console.log(error);
         }
     }
