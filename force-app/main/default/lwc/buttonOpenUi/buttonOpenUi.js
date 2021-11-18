@@ -22,4 +22,3 @@ export default class ButtonOpenUi extends NavigationMixin(LightningElement) {
         });
     }
 }
-

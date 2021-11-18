@@ -60,6 +60,3 @@ public with sharing class SampleLookupController {
         return results;
     }
 }
-
-
-

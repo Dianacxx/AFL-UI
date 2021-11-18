@@ -1,16 +1,24 @@
 <template>
-
     <template for:each={quoteLines} for:item="keyValue">
         <tr key={keyValue.key}>
+            <!--
             <th scope="col">
                 <div>{keyValue.key}</div>
             </th>
             <th scope="col">
                 <div>{keyValue.value}</div>
+            </th>-->
+            <th>
+                <lightning-datatable key-field="id" data={keyValue.value} columns={columns}></lightning-datatable>
             </th>
         </tr>
     </template>
-    {datos}
+    <div>
+        <lightning-datatable key-field="id" data={listQuoteLines2} columns={columns}></lightning-datatable>
+        
+        <lightning-button label="Add Row" onclick={addRow}></lightning-button>
+        {addVariable}
+    </div>
 <!--
     <lightning-datatable key-field="id" data={data} columns={columns}></lightning-datatable>
 -->
