@@ -5,11 +5,7 @@
       "default": true
     }
   ],
-<<<<<<< HEAD
-  "name": "CPQ_AFL",
-=======
   "name": "CQPAPI_Practice",
->>>>>>> 10f8f92fb9dea53f4644f456911e794241e44160
   "namespace": "",
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "52.0"

@@ -9,7 +9,21 @@
                 <div>{keyValue.value}</div>
             </th>-->
             <th>
-                <lightning-datatable key-field="id" data={keyValue.value} columns={columns}></lightning-datatable>
+                <div class="slds-grid slds-gutters slds-align_absolute-center">
+                    <div class="slds-col slds-size_11-of-12 slds-align_absolute-center">
+                        <lightning-datatable key-field="id" data={keyValue.value} columns={columns}></lightning-datatable>
+                    </div>
+                    <!--CHANGE THIS TO ALIGN BUTTONS OUTSIDE DATATABLE-->
+                    <div class="slds-col slds-size_1-of-12 slds-align_absolute-center">
+                        <div class="slds-grid slds-grid_vertical" >
+                        <template for:each={keyValue.value} for:item="QL">
+                                <div class="slds-col" key={QL.Id}>
+                                    <lightning-button variant="action:description" label="Base" onclick={handleClick} class="slds-m-left_x-small"></lightning-button>
+                                </div>
+                        </template>
+                        </div>
+                    </div>
+                </div>
             </th>
         </tr>
     </template>
@@ -20,4 +34,117 @@
         {addVariable}
     </div>
 
+     <!--Popup starts-->
+     <template if:true={modalContainer}>
+        <section  class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModalAction}>
+                       <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                    </button>
+                    <h2 class="slds-text-heading_medium slds-hyphenate">Available Discounts</h2>
+                 </header>
+                <!--ADD HERE THE TAB SET WITH THE INFORMATION OF TIERS-->
+                 <!--
+                     
+                 <div class="slds-modal__content slds-p-around_medium">
+                    
+                    <table class="slds-table slds-table_bordered slds-table_col-bordered slds-table_cell-buffer">
+                       <thead> 
+                        <tr>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email Name</th>
+                            <th>Phone Name</th>
+                        </tr>
+                    </thead>
+                    <tbody> 
+                        <tr>
+                            <td>{contactRow.FirstName}</td>
+                            <td>{contactRow.LastName}</td>
+                            <td>{contactRow.Email}</td>
+                            <td>{contactRow.Phone}</td>
+                        </tr>
+                    </tbody>   
+                    </table>
+                    
+                 </div>
+                 -->
+                 <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-card class="slds-align_absolute-center slds-size_small">
+                        <lightning-button-group class="slds-align_absolute-center">
+                            <lightning-button variant="brand-outline" label="Discount Tiers" title="Primary action" onclick={handleClick1}></lightning-button>
+                            <lightning-button variant="brand-outline" label="Contracted Prices" title="Secondary action" onclick={handleClick2}></lightning-button>
+                        </lightning-button-group> 
+                        <template if:true={clickedButtonLabel}>
+                            <!--Tier Name - Number - Discount-->
+                            <!--
+                            <lightning-datatable class="slds-align_absolute-center slds-size_large"
+                                key-field="id"
+                                data={contactRow}
+                                columns={columnsTiers}
+                                hide-checkbox-column=True>
+                            </lightning-datatable>
+                            -->
+                            <table class="slds-table slds-table_bordered slds-table_col-bordered slds-table_cell-buffer">
+                                <thead>  <tr>
+                                     <th>Tier Name</th>
+                                     <th>Number</th>
+                                     <th>Discount</th>
+                                </tr> </thead>
+                                <tbody> <tr>
+                                     <td>A</td>
+                                     <td>B</td>
+                                     <td>C</td>
+                                </tr> </tbody>   
+                            </table>
+                        </template>
+                        <template if:false={clickedButtonLabel}>
+                            <!--Contract - Effective Date - Price-->
+                            <!--
+                            <lightning-datatable class="slds-align_absolute-center slds-size_large"
+                                key-field="id"
+                                data={contactRow}
+                                columns={columnsTiers}
+                                hide-checkbox-column=True>
+                            </lightning-datatable>
+                            -->
+                            <table class="slds-table slds-table_bordered slds-table_col-bordered slds-table_cell-buffer">
+                                <thead>  <tr>
+                                     <th>Contract</th>
+                                     <th>Effective Date</th>
+                                     <th>Price</th>
+                                </tr> </thead>
+                                <tbody> <tr>
+                                     <td>D</td>
+                                     <td>E</td>
+                                     <td>F</td>
+                                </tr> </tbody>   
+                            </table>
+                        </template>
+                        <!--
+                        <lightning-tabset class="slds-align_absolute-center">
+                            <lightning-tab label="Discount Tiers">
+                               <p>DISCOUNTS</p>
+                            </lightning-tab>
+                            <lightning-tab label="Contacted Prices">
+                                <p>PRICES</p>
+                            </lightning-tab>
+                        </lightning-tabset>
+                        -->
+                    </lightning-card>
+                   <!-- <c-popup-tiers data-parent={contactRow}></c-popup-tiers>-->
+                 </div>
+                 <footer class="slds-modal__footer">                       
+                    <lightning-button variant="brand" label="Close" title="Close"  onclick={closeModalAction}></lightning-button>
+               </footer> 
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+    <br/><br/>
+    <!--Popup finish-->
+
+    <!--If the button to see tales is clicked show message-->
+    <p><lightning-formatted-text value={popup}></lightning-formatted-text></p>
 </template>
