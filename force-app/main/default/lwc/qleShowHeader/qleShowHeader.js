@@ -1,47 +1,23 @@
 import { LightningElement, api, wire, track } from 'lwc';
 //import { getRecord } from 'lightning/uiRecordApi';
-//import printQuote from '@salesforce/apex/QuoteController.printQuote';
-import printHeader from '@salesforce/apex/QuoteInformation.printHeader';
-import printName from '@salesforce/apex/QuoteInformation.printName';
+import printQuoteInfo from '@salesforce/apex/QuoteController.printQuoteInfo'; 
+
 
 export default class QleShowHeader extends LightningElement {
-    @track quote; 
+    
+    @track quoteDetail;
     @api recordId;
-    accData;
-    finalData;
 
-    //a0q5f000001B124AAC
-    @wire(printHeader, { quoteId: '$recordId'})
-    quote; 
-    
-    @wire(printName, { quoteId: '$recordId'})
-    name; 
-    /*
-    get name(){
-        
-    }
-    /*
-    get sbqqStatus() {
-        return this.quote.fields.SBQQ__Status__c.value;
-    }
-    /*
-    get fields(){
-        return this.quote.data.fields;
-    }
-    get sbqqAccount() {
-        return this.quote.data.fields.QuoteID.value;
+    //Quote data
+    @wire(printQuoteInfo, {quoteId: '$recordId'})
+    quoteDetailWire({error, data}){
+        if (data){
+            this.quoteDetail = JSON.parse(data);
+            this.error = undefined;
+        } else if (error){
+            this.error = JSON.parse(error.body.message);
+            this.quoteDetail = undefined; 
+        }
     }
 
-    get accountSla() {
-        return this.quote.data.fields.PricebookEntryId.value;
-    }
-
-    get sbqqType() {
-        return this.quote.data.fields.Discount.value;
-    }
-    
-    get sbqqExpirationDate() {
-        return this.quote.data.fields.Unitprice.value;
-    }
-    */
 }

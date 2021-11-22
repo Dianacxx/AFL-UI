@@ -7,7 +7,7 @@ public with sharing class QuoteController {
     public class QuoteLineWrapperClass{
         String id;
         String name;
-        
+        String tiers;        
      }
     public class ProductWrapperClass{
         String id;
@@ -21,7 +21,7 @@ public with sharing class QuoteController {
         
      }
     @AuraEnabled(cacheable=true)
-    public static List<QuoteLineWrapperClass> printQuoteLines(String quoteId) {
+    public static String printQuoteLines(String quoteId) {
         QuoteReader quoteReader = new QuoteReader();
         // QuoteModel quote = quoteReader.read('a0q5f0000013pc3AAA');
         QuoteModel quote = quoteReader.read(quoteId);
@@ -42,11 +42,11 @@ public with sharing class QuoteController {
 
         System.debug(displayQuoteLine);
         System.debug(displayQuoteLine.size());
-        return displayQuoteLine;
+        return JSON.serialize(displayQuoteLine);
     } 
     
     @AuraEnabled(cacheable=true)
-    public static QuoteWrapperClass printQuoteInfo(String quoteId) {
+    public static String printQuoteInfo(String quoteId) {
         QuoteReader quoteReader = new QuoteReader();
         // QuoteModel quote = quoteReader.read('a0q5f0000013pc3AAA');
         QuoteModel quote = quoteReader.read(quoteId);
@@ -56,7 +56,7 @@ public with sharing class QuoteController {
         wrapper.status = quote.record.SBQQ__Status__c;
         
        System.debug('name '+quote.record.Name + ' Status ' + quote.record.SBQQ__Status__c);
-       return wrapper;
+       return JSON.serialize(wrapper);
     } 
     @AuraEnabled(cacheable=true)
     public static void addQuoteLine(String quoteId, String productId) {
@@ -77,7 +77,7 @@ public with sharing class QuoteController {
         System.debug(savedQuote);
     }
     @AuraEnabled (cacheable = true)
-    public static ProductWrapperClass printProduct(String quoteId, String productId){
+    public static String printProduct(String quoteId, String productId){
         ProductReader reader = new ProductReader();
         Pricebook2 prodPriceBook = [SELECT Id FROM Pricebook2 WHERE Id IN (SELECT SBQQ__PriceBook__c FROM SBQQ__Quote__c WHERE Id =: quoteId) LIMIT 1];
         ProductModel product = reader.read(productId,prodPriceBook.Id,'USD');
@@ -88,7 +88,7 @@ public with sharing class QuoteController {
         wrapper.name = product.record.Name;
 
         System.debug(wrapper);
-        return wrapper;
+        return JSON.serialize(wrapper);
     }
     @AuraEnabled (cacheable = true)
     public static void printProductConfig(String quoteId, String productId ){
@@ -107,7 +107,7 @@ public with sharing class QuoteController {
         // }
     }
     @AuraEnabled (cacheable = true)
-    public static List<FieldSetWrapperClass> displayFieldSet(String quoteId){
+    public static String displayFieldSet(String quoteId){
         SBQQ__Quote__c quote = [SELECT Id, AccountIndustry__c FROM SBQQ__Quote__c WHERE Id =: quoteId];
         String fieldSetName ;
         if (quote.AccountIndustry__c == 'Education') {
@@ -146,7 +146,7 @@ public with sharing class QuoteController {
 
         System.debug(fields);
         System.debug(fields.size());
-        return fields;
+        return JSON.serialize(fields);
     }
 
 }

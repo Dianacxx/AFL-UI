@@ -1,31 +1,7 @@
 <template>
     <lightning-card>
-        <div>
-            <template if:true={quoteLines}>
-                <!--QuoteLine Data: {quoteLines.data} 
-                <ul>
-                    <li for:each={quoteLines} for:item="quoteItem" key={quoteItem.id}>
-                        {quoteItem.name}
-                    </li>
-                </ul>-->
-                <lightning-datatable  key-field="id" data={quoteLines} columns={columns} onrowaction={handleRowAction}></lightning-datatable>
-                Button: {buttonClone} 
-            </template>
-        </div>
-        <div>
-            <template if:true={quote}>
-                <!--Change this to show the data with string serializa in apex-->
-                Quote Data: {quote.data} 
-            </template>
-        </div>
-        <div>
-            <template if:false={quoteLines}>
-                <p>QUOTELINES FALSE</p>
-            </template>
-            <template if:false={quote}>
-                <p>QUOTE FALSE</p>
-            </template>
-        </div>
-    <lightning-button label="Clone" onclick={handleClone}></lightning-button>
-</lightning-card>
+       <h1>USE THIS TO TRY THINGS IN THE UI</h1>
+       <br/>
+       <h2>TRYING WITH {recorsId}</h2>
+    </lightning-card>
 </template>
