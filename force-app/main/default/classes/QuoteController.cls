@@ -7,6 +7,7 @@ public with sharing class QuoteController {
     public class QuoteLineWrapperClass{
         String id;
         String name;
+        String product;
         String tiers;        
      }
     public class ProductWrapperClass{
@@ -35,8 +36,12 @@ public with sharing class QuoteController {
             QuoteLineWrapperClass wrapper = new QuoteLineWrapperClass();
             wrapper.id = line.record.id;
             wrapper.name = line.record.name;
+            wrapper.product = JSON.serialize(line.record.SBQQ__Product__c);
+            wrapper.tiers = JSON.serialize(line.record.SBQQ__DiscountTier__c);
 
-            system.debug(wrapper);
+            //system.debug(wrapper);
+            System.debug('products - '+ line.record.SBQQ__Product__c);
+            System.debug('tiers - '+ line.record.SBQQ__DiscountTier__c);
             displayQuoteLine.add (wrapper);
         }
 

@@ -1,27 +1,5 @@
 <template>
-    <lightning-card>
         <div class="slds-form slds-form_stacked slds-var-m-around_xx-large">
-           <!-- <div class="slds-grid slds-gutters">
-                <div class="slds-col">
-                    <lightning-input
-                        type="toggle"
-                        label="Mutli entry lookup"
-                        checked={isMultiEntry}
-                        onchange={handleLookupTypeChange}
-                    ></lightning-input>
-                </div>
-                <div class="slds-col" if:true={isMultiEntry}>
-                    <lightning-input
-                        type="number"
-                        label="Max selected items"
-                        min="1"
-                        value={maxSelectionSize}
-                        onchange={handleMaxSelectionSizeChange}
-                        required
-                    ></lightning-input>
-                </div>
-            </div>
-            -->
             <c-lookup
                 selection={initialSelection}
                 errors={errors}
@@ -37,5 +15,4 @@
             <lightning-button label="Clear" onclick={handleClear}></lightning-button>&nbsp;
             <lightning-button variant="brand" label="Submit" onclick={handleSubmit}></lightning-button>
         </div>
-    </lightning-card>
 </template>

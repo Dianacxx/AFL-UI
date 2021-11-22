@@ -1,5 +1,11 @@
 import { LightningElement, wire, api, track } from 'lwc';
 import printQuoteLines from '@salesforce/apex/QuoteController.printQuoteLines'; 
+//import addQuoteLine from '@salesforce/apex/QuoteController.addQuoteLine'; 
+
+import { subscribe, MessageContext } from 'lightning/messageService';
+import QLE_CHANNEL from  '@salesforce/messageChannel/Qle_Comms__c';
+
+
 
 const COLUMNS = [
     { label: 'ID', fieldName: 'id'},
@@ -17,12 +23,13 @@ const COLUMNS2 = [
 
 export default class QleDataTable extends LightningElement {
     @api recordId;
+    productId; 
     
     @track columns;    
     
     @track quoteLines = []; 
-    @track aux = 2; 
-    @track listQuoteLines = []; 
+    @track quoteLinesCopy = []; 
+    @track aux = 1; 
     @track addVariable = 'Not Yet';
     @track aux2 = 0; 
 
@@ -49,31 +56,27 @@ export default class QleDataTable extends LightningElement {
             this.quoteLines = undefined; 
         }
     }
-
-    /*@wire(printQuoteLines, { quoteId: '$recordId'})
-    wiredSeatList({error,data}) {
-        if (data) {
-            for (let key in data) {
-               this.quoteLines.push({value:data[key], key:key});
-               this.listQuoteLines = [...data[key]];
-               this.aux = key; 
-               //CHANGE OF COLUMNS DEPENDING DATA RETRIEVING
-               if (this.aux == 1){this.columns = COLUMNS;}
-               else {this.columns = COLUMNS2;} //Depending key, it shows, columns names. 
-            }
-               this.aux = key; 
-        }
-        else if (error) {
-            window.console.log(error);
-        }
-    }*/
-
-    //Add rows to table (Not working yet)
-    addRow(){
-        this.listQuoteLines = this.quoteLines[this.aux2];
-        this.aux2 += 1; 
-        this.addVariable = 'Added'; 
+    //Add rows to table (ADDING FROM THE SAME LIST, MISSING ADDING FROM LOOK UP FIELD)
+    @wire(MessageContext)
+    messageContext;
+    subscribeToMessageChannel() {
+        this.subscription = subscribe(
+          this.messageContext,
+          QLE_CHANNEL,
+          (message) => this.handleMessage(message)
+        );
     }
+    handleMessage(message) {
+        this.productId = message.recordId;
+        this.quoteLines = [...this.quoteLines, {id: message.recordId[this.aux2], name: 'New Addition'}];
+        this.aux2 += 1; 
+    }
+    connectedCallback() {
+        this.subscribeToMessageChannel();
+    }
+    //ASK IF THIS IS THE METHOD TO ADD THOSE
+    //@wire(addQuoteLine,{quoteId: '$recordId', productId: '$productId'})
+
 
     //Click to see Tiers and Delete Row (Not working yet)
     handleRowAction(event) {
@@ -84,11 +87,10 @@ export default class QleDataTable extends LightningElement {
             this.modalContainer = true;
 
         } else if(event.detail.action.name === 'Delete') {
-            const dataRow = event.detail.row;
-            this.quoteLineRow = dataRow;
-            this.popup="Eliminado: "+ quoteLineRow.Name;
-            const index = this.quoteLines.indexOf(quoteLineRow); 
-            this.quoteLines.splice(index,1); 
+            let dataRow = event.detail.row;
+            let row = this.quoteLines.findIndex(x => x.id === dataRow.id);
+            this.popup = "Eliminado: " + dataRow.name + " Row: " + row;
+            this.quoteLines.splice(row,1); 
         }
     }
 

@@ -4,9 +4,7 @@
     </div>
             
     <div>
-        <lightning-datatable key-field="id" data={listQuoteLines} columns={columns}></lightning-datatable>
-        <lightning-button label="Add Row" onclick={addRow}></lightning-button>
-        {addVariable}
+        <lightning-datatable key-field="id" data={quoteLinesCopy} columns={columns}></lightning-datatable>
     </div>
 
      <!--Popup starts-->
