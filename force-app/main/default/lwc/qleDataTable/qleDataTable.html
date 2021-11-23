@@ -1,10 +1,10 @@
 <template>
     <div class="slds-align_absolute-center">
-        <lightning-datatable key-field="id" data={quoteLines} columns={columns} onrowaction={handleRowAction}></lightning-datatable>
+        <lightning-datatable key-field="id" data={quoteLines} columns={columns} onrowaction={handleRowAction} onrowselection={getSelectedName}></lightning-datatable>
     </div>
             
     <div>
-        <lightning-datatable key-field="id" data={quoteLinesCopy} columns={columns}></lightning-datatable>
+       <lightning-datatable key-field="id" data={quoteLinesCopy} columns={columns} onrowaction={handleRowAction} onrowselection={getSelectedName}></lightning-datatable>
     </div>
 
      <!--Popup starts-->
@@ -18,29 +18,54 @@
                     <h2 class="slds-text-heading_medium slds-hyphenate">Available Discounts</h2>
                  </header>
                 <!--ADD HERE THE TAB SET WITH THE INFORMATION OF TIERS-->
-                 <div class="slds-modal__content slds-p-around_medium">
-                    <lightning-card class="slds-align_absolute-center slds-size_small">
+                 <div class="slds-modal__content slds-p-around_large">
+                    <lightning-card class="slds-align_absolute-center slds-size_large">
                         <lightning-button-group class="slds-align_absolute-center">
                             <lightning-button variant="brand-outline" label="Discount Tiers" title="Primary action" onclick={handleClick1}></lightning-button>
                             <lightning-button variant="brand-outline" label="Contracted Prices" title="Secondary action" onclick={handleClick2}></lightning-button>
                         </lightning-button-group> 
                         <template if:true={clickedButtonLabel}>
                             <!--Tier Name - Number - Discount-->
-                            <table class="slds-table slds-table_bordered slds-table_col-bordered slds-table_cell-buffer">
-                                <thead>  <tr>
-                                     <th>Tier Name</th>
-                                     <th>Number</th>
-                                     <th>Discount</th>
-                                </tr> </thead>
-                                <tbody> <tr>
-                                     <td>A</td>
-                                     <td>B</td>
-                                     <td>C</td>
-                                </tr> </tbody>   
-                            </table>
+                            <template if:true={quoteLineRow.tiers}>
+                                <!--<p>QuoteLine ID: {quoteLineRow.id} - QuoteLine Name: {quoteLineRow.name}</p>-->
+                                <template if:true={tiersSize.id}>
+                                    <lightning-datatable key-field="id" data={tiersData} columns={columnsTiers} hide-checkbox-column=true onresize={handleResize}></lightning-datatable>
+                                    <!--
+                                    <p>
+                                        Tiers ID: {tiersSize.id},
+                                        NAME :{tiersSize.name},
+                                        UPPERBOUND: {tiersSize.upperBound}
+                                    </p>
+                                    -->
+                                </template>
+                                <template if:false={tiersSize.id}>
+                                    <h2 class="slds-text-heading_medium slds-m-bottom_medium slds-align_absolute-center" >THERE ARE NOT TIERS IN THIS QUOTE LINE</h2>
+                                </template>
+                                <!--
+                                -->
+                            </template>
                         </template>
                         <template if:false={clickedButtonLabel}>
                             <!--Contract - Effective Date - Price-->
+                            <template if:true={quoteLineRow.tiers}>
+                                <template if:true={tiersSize.id}>
+                                    <p>CHANGE WITH CONTRACTS</p>
+                                    <lightning-datatable key-field="id" data={tiersData} columns={columnsContracts} hide-checkbox-column=true onresize={handleResize}></lightning-datatable>
+                                    <!--
+                                    <p>
+                                        Tiers ID: {tiersSize.id},
+                                        NAME :{tiersSize.name},
+                                        UPPERBOUND: {tiersSize.upperBound}
+                                    </p>
+                                    -->
+                                </template>
+                                <template if:false={tiersSize.id}>
+                                    <h2 class="slds-text-heading_medium slds-m-bottom_medium slds-align_absolute-center" >THERE ARE NOT CONTRACTS IN THIS QUOTE LINE</h2>
+                                </template>
+                                <!--
+                                -->
+                            </template>
+                            <!--
                             <table class="slds-table slds-table_bordered slds-table_col-bordered slds-table_cell-buffer">
                                 <thead>  <tr>
                                      <th>Contract</th>
@@ -52,7 +77,7 @@
                                      <td>E</td>
                                      <td>F</td>
                                 </tr> </tbody>   
-                            </table>
+                            </table>-->
                         </template>
                     </lightning-card>
                  </div>

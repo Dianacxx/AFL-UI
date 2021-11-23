@@ -2,9 +2,23 @@ import { LightningElement , api, wire, track} from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import printListAmount from '@salesforce/apex/QuoteInformation.printListAmount';
 
+import { subscribe, publish, MessageContext } from 'lightning/messageService';
+import QLE_CHANNEL from  '@salesforce/messageChannel/Qle_Comms__c';
+
+const COLUMNS = [
+    { label: 'ID', fieldName: 'id'},
+    { label: 'Name', fieldName: 'name'},
+];
+
 export default class QleAddProductSection extends NavigationMixin(LightningElement) {
     //@api totalQuote = 1345692;
     @api recordId;
+    @api quoteLinesOrder = []; 
+    @track dragStart;
+    @track columns = COLUMNS;
+    //------CHANNEL TO SEND INFORMATION
+    @wire(MessageContext)
+    messageContext;
 
     //GETTING LIST AMOUNT TO SHOW IN QUOTE TOTAL VALUE
     @wire(printListAmount, {quoteId: '$recordId'})
@@ -14,6 +28,12 @@ export default class QleAddProductSection extends NavigationMixin(LightningEleme
     @track isModalOpen = false;
     openModal() {
         this.isModalOpen = true;
+        //SENDING MESSAGE TO CHANNEL
+        const payload = { 
+            recordId: null,
+            recordData: 'Reorder'
+        };
+        publish(this.messageContext, QLE_CHANNEL, payload);
     }
     closeModal() {
         this.isModalOpen = false;
@@ -53,6 +73,35 @@ export default class QleAddProductSection extends NavigationMixin(LightningEleme
                 url: '/one/one.app#' + encodedComponentDef
             }
         });
+    }
+    
+
+    
+    //TO CLONE SELECTED ROWS IN TABLE
+    cloneRowsInTable(){
+        //SENDING MESSAGE TO CHANNEL
+        const payload = { 
+            recordId: null,
+            recordData: 'Cloned'
+        };
+        publish(this.messageContext, QLE_CHANNEL, payload);
+    }
+
+    subscribeToMessageChannel() {
+        this.subscription = subscribe(
+          this.messageContext,
+          QLE_CHANNEL,
+          (message) => this.handleMessage(message)
+        );
+    }
+    handleMessage(message) { 
+        if (message.recordData == 'Reordering'){
+            this.quoteLinesOrder = message.recordId;
+            this.popup = message.recordData;
+        }
+    }
+    connectedCallback() {
+        this.subscribeToMessageChannel();
     }
     
 }

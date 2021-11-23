@@ -26,7 +26,7 @@
                         <!--PUT FUNCTION HERE TO OPEN PRODUCT SELECTION-->
                         <lightning-button variant="brand-outline" class="slds-m-right_small" label="Product Selection"  onclick={navitageToLWCWithoutAura}></lightning-button>
                         <!--PUT FUNCTION HERE TO CLONE SELECTED VALUES-->
-                        <lightning-button variant="brand-outline" label="Clone Selected"></lightning-button>
+                        <lightning-button variant="brand-outline" label="Clone Selected" onclick={cloneRowsInTable}></lightning-button>
                     <br/>
                     </div>
                 <div class="slds-align_absolute-center slds-m-top_small">
@@ -58,6 +58,9 @@
                     <!-- Modal/Popup Box LWC body starts here -->
                     <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
                         <p><b>Here goes the table with reorder lines options</b></p>
+                        <!--<lightning-datatable key-field="id" data={quoteLinesOrder} columns={columns}>
+                        </lightning-datatable>-->
+                       <c-drag-and-drop-table quote-lines-reorder={quoteLinesOrder}></c-drag-and-drop-table>
                     </div>
                     <!-- Modal/Popup Box LWC footer starts here -->
                     <footer class="slds-modal__footer">
