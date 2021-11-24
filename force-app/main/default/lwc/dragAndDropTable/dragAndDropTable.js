@@ -1,19 +1,40 @@
 import { LightningElement, api, wire, track } from 'lwc';
-
+import { subscribe, publish, MessageContext } from 'lightning/messageService';
+import TABLE_CHANNEL from '@salesforce/messageChannel/Table_Comms__c'; 
 
 export default class DragAndDropTable extends LightningElement {
-    @api quoteLinesReorder; 
+    @track quoteLinesReorder; 
     @track dragStart;
-    @track ElementList = [
+    @track ElementList = [];  
+    /*[
         {id: 1, name:'A'},
         {id: 2, name:'B'},
         {id: 3, name:'C'},
         {id: 4, name:'D'},
         {id: 5, name:'E'},
         {id: 6, name:'F'}
-    ];
+    ];*/
     @api PopUpReorder = false; 
    
+    //------CHANNEL TO SEND INFORMATION
+    @wire(MessageContext)
+    messageContext;
+    subscribeToMessageChannel() {
+      this.subscription = subscribe(
+        this.messageContext,
+        TABLE_CHANNEL,
+        (message) => this.handleMessage(message)
+      );
+    }
+    handleMessage(message) { 
+      if (message.check == 'PopUpOrder'){
+          this.quoteLinesReorder = message.dataTable;
+          this.ElementList = this.quoteLinesReorder; 
+      }
+    }
+    connectedCallback() {
+      this.subscribeToMessageChannel();
+    }
 
     DragStart(event) {
       this.dragStart = event.target.title;

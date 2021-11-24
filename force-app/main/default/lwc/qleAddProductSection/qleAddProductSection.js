@@ -4,6 +4,7 @@ import printListAmount from '@salesforce/apex/QuoteInformation.printListAmount';
 
 import { subscribe, publish, MessageContext } from 'lightning/messageService';
 import QLE_CHANNEL from  '@salesforce/messageChannel/Qle_Comms__c';
+import TABLE_CHANNEL from '@salesforce/messageChannel/Table_Comms__c'; 
 
 const COLUMNS = [
     { label: 'ID', fieldName: 'id'},
@@ -13,7 +14,7 @@ const COLUMNS = [
 export default class QleAddProductSection extends NavigationMixin(LightningElement) {
     //@api totalQuote = 1345692;
     @api recordId;
-    @api quoteLinesOrder = []; 
+    @track quoteLinesOrder = []; 
     @track dragStart;
     @track columns = COLUMNS;
     //------CHANNEL TO SEND INFORMATION
@@ -28,13 +29,15 @@ export default class QleAddProductSection extends NavigationMixin(LightningEleme
     @track isModalOpen = false;
     openModal() {
         this.isModalOpen = true;
-        //SENDING MESSAGE TO CHANNEL
+        //SENDING MESSAGE TO CHANNEL OPEN POP UP
         const payload = { 
             recordId: null,
             recordData: 'Reorder'
         };
         publish(this.messageContext, QLE_CHANNEL, payload);
+
     }
+
     closeModal() {
         this.isModalOpen = false;
     }
@@ -75,8 +78,6 @@ export default class QleAddProductSection extends NavigationMixin(LightningEleme
         });
     }
     
-
-    
     //TO CLONE SELECTED ROWS IN TABLE
     cloneRowsInTable(){
         //SENDING MESSAGE TO CHANNEL
@@ -90,14 +91,14 @@ export default class QleAddProductSection extends NavigationMixin(LightningEleme
     subscribeToMessageChannel() {
         this.subscription = subscribe(
           this.messageContext,
-          QLE_CHANNEL,
+          TABLE_CHANNEL,
           (message) => this.handleMessage(message)
         );
     }
     handleMessage(message) { 
-        if (message.recordData == 'Reordering'){
-            this.quoteLinesOrder = message.recordId;
-            this.popup = message.recordData;
+        if (message.check == 'PopUpOrder'){
+            this.quoteLinesOrder = message.dataTable;
+            this.popup = message.check;
         }
     }
     connectedCallback() {

@@ -4,6 +4,7 @@ import printQuoteLines from '@salesforce/apex/QuoteController.printQuoteLines';
 
 import { publish, subscribe, MessageContext } from 'lightning/messageService';
 import QLE_CHANNEL from  '@salesforce/messageChannel/Qle_Comms__c';
+import TABLE_CHANNEL from '@salesforce/messageChannel/Table_Comms__c'; 
 
 
 
@@ -105,11 +106,12 @@ export default class QleDataTable extends LightningElement {
         }
         else if (message.recordData == 'Reorder'){
             this.popup = 'Reorder'; 
-            const payload = { 
-                recordId: this.quoteLinesCopy,
-                recordData: 'Reordering'
+            //SENDING MESSAGE TO CHANNEL TO SEND QUOLINES TO ORDER TABLE
+            const payload2 = { 
+                dataTable: this.quoteLines,
+                check: 'PopUpOrder'
             };
-            publish(this.messageContext, QLE_CHANNEL, payload);
+            publish(this.messageContext, TABLE_CHANNEL, payload2);
         }
     }
     connectedCallback() {
