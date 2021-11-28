@@ -17,7 +17,14 @@ public with sharing class QuoteLineModel {
     public Decimal targetCustomerTotal;
     public SBQQ__DiscountTier__c discount;
 
+	public SBQQ__QuoteLine__c getRecord() {
+		return this.record;
+	}
 
+	public void setRecord(SBQQ__QuoteLine__c record) {
+		this.record = record;
+	}
+	
 	public SBQQ__DiscountTier__c getDiscount() {
 		return this.discount;
 	}

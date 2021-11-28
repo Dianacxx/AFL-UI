@@ -8,7 +8,72 @@ public with sharing class QuoteController {
         String id;
         String name;
         String product;
-        String tiers;        
+        String tiers;
+        String productName;
+        String quantity;
+        String listPrice;
+        String discount;
+        String additionalDiscountAmount;
+        String additionalQuantity;
+        String allowAssetRefound;
+        String batchQuantity;
+        String billingFrequency;
+        String billingType;
+        String bundled;
+        String componentCost;
+        String componentSubscription;
+        String compoundDiscountRate;
+        String configurationRequired;
+        String customerPrice;
+        String defaultSubsTerm;
+        String description;
+        String distributorDisc;
+        String dynamOptionID;
+        String earliestValidAmendStartDate;
+        String endDate;
+        String generateContractedPrice;
+        String grossProfit;
+        String grp;
+        String guidance;
+        String hasConsumptSchedule;
+        String hidden;
+        String markupRate;
+        String markupAmount;
+        String maxPrice;
+        String minPrice;
+        String netPrice;
+        String nonDisc;
+        String nonPartnerDisc;
+        String nmber;
+        String optionDisc;
+        String optionDiscAmount;
+        String optionLvl;
+        String optionType;
+        String optional;
+        String originalPrice;
+        String bundledQuantity;
+        String originalUnitCost;
+        String bundle;
+        String packageProductCode;
+        String packageProdDescription;
+        String partnerPrice;
+        String subsPercent;
+        String subsBase;
+        String subsCategory;
+        String subsScope;
+        String subsTargetPrice;
+        String prevSegmentPrice;
+        String prevSegmentUplift;
+        String pricebookEntryID;
+        String pricingMethod;
+        String renewal;
+        String specialPrice;
+        String startDate;
+        String taxCode;
+        String taxable;
+        String unitCost;
+        
+
      }
     public class DiscountTierWrapperClass{
         String id;
@@ -26,6 +91,7 @@ public with sharing class QuoteController {
      }
     public class FieldSetWrapperClass{
         String label;
+        String apiName;
         Boolean required;
         Schema.DisplayType type;
         
@@ -46,6 +112,7 @@ public with sharing class QuoteController {
             wrapper.id = line.record.id;
             wrapper.name = line.record.name;
             wrapper.product = JSON.serialize(line.record.SBQQ__Product__c);
+            wrapper.quantity = String.valueOf(line.record.SBQQ__Quantity__c);
             if (discountTier != null) {
                 SBQQ__DiscountTier__c tier = [SELECT Id, Name,SBQQ__LowerBound__c,SBQQ__UpperBound__c,SBQQ__Discount__c,SBQQ__DiscountAmount__c,SBQQ__Price__c FROM SBQQ__DiscountTier__c WHERE Id =: discountTier LIMIT 1];
                 tierWrapper.id = tier.Id;
@@ -163,6 +230,7 @@ public with sharing class QuoteController {
         for(Schema.FieldSetMember fieldSetMemberObj : fieldSetMemberList){
             FieldSetWrapperClass wrapper = new FieldSetWrapperClass();
             wrapper.label = fieldSetMemberObj.getLabel();
+            wrapper.apiName = fieldSetMemberObj.getFieldPath();
             wrapper.required = fieldSetMemberObj.getRequired();
             wrapper.type = fieldSetMemberObj.getType();
 
@@ -172,6 +240,65 @@ public with sharing class QuoteController {
         System.debug(fields);
         System.debug(fields.size());
         return JSON.serialize(fields);
+    }
+    @AuraEnabled (cacheable = true)
+    public static String saveAndCalculateQuote(String quoteId, String quoteLines){
+        QuoteReader quoteReader = new QuoteReader();
+        QuoteModel quote = quoteReader.read(quoteId);
+        // List<QuoteLineModel> untypedQuoteLines = (List<QuoteLineModel>) JSON.deserializeUntyped(quoteLines);
+        // Map<String, QuoteLineModel> untypedQuoteLines = (Map<String, QuoteLineModel>) JSON.deserialize(quoteLines, Map<String, QuoteLineModel>.class);
+        Map<String,Object> untypedQuoteLines = (Map<String,Object>) JSON.deserializeUntyped(quoteLines);
+        System.debug(untypedQuoteLines);
+        QuoteSaver saver = new QuoteSaver();
+        QuoteCalculator calculator = new QuoteCalculator();
+        String quoteLineID = String.valueOf(untypedQuoteLines.get('id'));
+        String fieldSetJSON = displayFieldSet(quoteId);
+        List<FieldSetWrapperClass> fieldset = (List<FieldSetWrapperClass>)JSON.deserialize(fieldSetJSON,List<FieldSetWrapperClass>.class);
+        List<SBQQ__QuoteLine__c> existingQuoteLines = [SELECT ID FROM SBQQ__QuoteLine__c];
+        Set<Id> quoteLineIDs = new Set<Id>();
+        System.debug(fieldset);
+        List<QuoteLineModel> quoteLinesToInsert = new List<QuoteLineModel>();
+        //Add the existing quote line ids to a set
+        for (SBQQ__QuoteLine__c line : existingQuoteLines) {
+            quoteLineIDs.add(line.id);
+        }
+
+        for (Integer i; i==0; i<untypedQuoteLines.size()) {
+            if (quoteLineIDs.contains(String.valueOf(untypedQuoteLines.get('id')))) {
+                QuoteLineModel quoteLine = new QuoteLineModel();
+                quoteLine.setRecord([SELECT ID, SBQQ__Quote__c, SBQQ__Product__c FROM SBQQ__QuoteLine__c WHERE ID =: quoteLineID LIMIT 1]);
+                
+                // quoteLine.record.SBQQ__Quantity__c = Decimal.valueOf(untypedQuoteLines.get('quantity'));
+                quoteLinesToInsert.add(quoteLine);
+            }
+        }
+        
+
+        quote.setLineItems(quoteLinesToInsert);
+        // quote.setLineItems(untypedQuoteLines.values());
+        System.debug('Qoute line info : ' + quoteLinesToInsert);
+       // quote.setLineItems(untypedQuoteLines);
+        // QuoteModel quote = quoteReader.read('a0q5f0000013pc3AAA');
+        
+        // for (QuoteLineModel line : untypedQuote.lineItems) {
+        //quote.lineItems[0].record.SBQQ__Quantity__c = 14;    
+        // }
+        QuoteModel savedQuote = saver.save(quote);
+        calculator.calculate(savedQuote, 'MyCallback');
+        String total = String.valueOf(savedQuote.netTotal);
+        
+        System.debug('TOTAL ' + total);
+
+        return JSON.serialize(total);
+    }
+    @AuraEnabled (cacheable = true)
+    public static String saveQuote(String quoteId, String quoteLines){
+        // QuoteReader quoteReader = new QuoteReader();
+        // QuoteSaver saver = new QuoteSaver();
+
+        // QuoteModel quote = quoteReader.read(quoteId);
+        // QuoteModel savedQuote = saver.save(quote);
+        return quoteLines;
     }
 
 }

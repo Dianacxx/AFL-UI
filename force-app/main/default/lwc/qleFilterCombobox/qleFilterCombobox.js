@@ -30,7 +30,7 @@ export default class QleFilterCombobox extends LightningElement {
             
         } else if (error) {
             // Handle error
-            console.log('==============Error  ');
+            console.log('qle Filter Combobox Error - getObjectInfo Start of process');
             console.log(error);
         }
     }
@@ -48,7 +48,7 @@ export default class QleFilterCombobox extends LightningElement {
 
         } else if (error) {
             // Handle error
-            console.log('==============Error  ' + error);
+            console.log('qle Filter Combobox Error - getPicklistValues Start of process  ' + error);
             console.log(error);
         }
     }

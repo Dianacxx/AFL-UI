@@ -17,6 +17,40 @@ export default class QleAddProductSection extends NavigationMixin(LightningEleme
     @track quoteLinesOrder = []; 
     @track dragStart;
     @track columns = COLUMNS;
+    //--THE POP-UP TABLE + DRAG AND DROP ACTION
+    @track quoteLinesReorder;
+    @track dragStart;
+    @track ElementList = []; 
+    @api longitud; 
+      
+      @track PopUpReorder =''; 
+     //---DRAG SITUATION ---------------
+     DragStart(event) {
+        this.dragStart = event.target.title;
+        event.target.classList.add("drag");
+      }
+    
+      DragOver(event) {
+        event.preventDefault();
+        return false;
+      }
+    
+      Drop(event) {
+        event.stopPropagation();
+        const DragValName = this.dragStart;
+        const DropValName = event.target.title;
+        if (DragValName === DropValName) {
+          return false;
+        }
+        const index = DropValName;
+        const currentIndex = DragValName;
+        const newIndex = DropValName;
+        Array.prototype.move = function (from, to) {
+          this.splice(to, 0, this.splice(from, 1)[0]);
+        };
+        this.ElementList.move(currentIndex, newIndex);
+      }
+
     //------CHANNEL TO SEND INFORMATION
     @wire(MessageContext)
     messageContext;
@@ -98,7 +132,12 @@ export default class QleAddProductSection extends NavigationMixin(LightningEleme
     handleMessage(message) { 
         if (message.check == 'PopUpOrder'){
             this.quoteLinesOrder = message.dataTable;
-            this.popup = message.check;
+            this.longitud = this.quoteLinesOrder.length; 
+            for(let i=0; i< this.longitud; i++){
+                this.ElementList.push(this.quoteLinesOrder[i]); 
+            } 
+            this.PopUpReorder = message.check;
+            console.log(this.quoteLinesOrder)
         }
     }
     connectedCallback() {

@@ -1,4 +1,12 @@
 <template>
+    <lightning-button variant="success" 
+    label="Sending Array of quote lines" title="Sending QL" 
+    onclick={handleSend}
+    class="slds-align_absolute-center"> </lightning-button>
+    
+    <!--VARIABLE popup HELPS TO SEE ACTIONS HAPPENING-->
+    
+    <p class="slds-align_absolute-center" style="background-color:SlateBlue;"><b><lightning-formatted-text value={popup}></lightning-formatted-text></b></p>
     <div class="slds-align_absolute-center">
         <lightning-datatable key-field="id" data={quoteLines} columns={columns} onrowaction={handleRowAction} onrowselection={getSelectedName}></lightning-datatable>
     </div>
@@ -90,7 +98,5 @@
     </template>
     <br/><br/>
     <!--Popup finish-->
-
-    <!--If the button to see tales is clicked show message-->
-    <p><lightning-formatted-text value={popup}></lightning-formatted-text></p>
+   
 </template>

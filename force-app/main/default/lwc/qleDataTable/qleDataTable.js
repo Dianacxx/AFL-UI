@@ -1,6 +1,9 @@
 import { LightningElement, wire, api, track } from 'lwc';
 import printQuoteLines from '@salesforce/apex/QuoteController.printQuoteLines'; 
 //import addQuoteLine from '@salesforce/apex/QuoteController.addQuoteLine'; 
+import saveAndCalculateQuote from '@salesforce/apex/QuoteController.saveAndCalculateQuote';
+import saveQuote from '@salesforce/apex/QuoteController.saveQuote';
+
 
 import { publish, subscribe, MessageContext } from 'lightning/messageService';
 import QLE_CHANNEL from  '@salesforce/messageChannel/Qle_Comms__c';
@@ -106,12 +109,11 @@ export default class QleDataTable extends LightningElement {
         }
         else if (message.recordData == 'Reorder'){
             this.popup = 'Reorder'; 
-            //SENDING MESSAGE TO CHANNEL TO SEND QUOLINES TO ORDER TABLE
-            const payload2 = { 
+            const payload = { 
                 dataTable: this.quoteLines,
                 check: 'PopUpOrder'
             };
-            publish(this.messageContext, TABLE_CHANNEL, payload2);
+            publish(this.messageContext, TABLE_CHANNEL, payload);
         }
     }
     connectedCallback() {
@@ -182,5 +184,25 @@ export default class QleDataTable extends LightningElement {
         const sizes = event.detail.columnWidths;
     }
 
+    @api sending; 
+    
+    handleSend(event){
 
+        console.log('BUTTON CLICKED');
+        this.sending = JSON.stringify(this.quoteLines);
+        this.popup = 'Sending To Apex';
+        
+        saveQuote({quoteId: this.recordId , quoteLines: this.sending})
+        .then((result) => {
+            console.log("Working");
+            console.log(result);
+        })
+        .catch((error) => {
+            console.log(error);
+            console.log(error.status + " " + error.body.message);
+        })
+
+        console.log('DONE FROM JS');
+    }
+    
 }
