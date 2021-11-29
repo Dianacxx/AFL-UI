@@ -110,7 +110,7 @@ export default class QleDataTable extends LightningElement {
         else if (message.recordData == 'Reorder'){
             this.popup = 'Reorder'; 
             const payload = { 
-                dataTable: this.quoteLines,
+                dataTable: this.quoteLinesCopy,
                 check: 'PopUpOrder'
             };
             publish(this.messageContext, TABLE_CHANNEL, payload);
@@ -138,7 +138,7 @@ export default class QleDataTable extends LightningElement {
         if (event.detail.action.name === 'More') {
             this.popup ==="Clickeado!" ? this.popup="Desclickeado!" : this.popup="Clickeado!";
             let dataRow = event.detail.row;
-            let row = this.quoteLines.findIndex(x => x.id === dataRow.id);
+            let row = this.quoteLinesCopy.findIndex(x => x.id === dataRow.id);
             this.quoteLineRow = dataRow;
             this.clickedButtonLabel = true;
             this.tiersSize = JSON.parse(this.quoteLineRow.tiers);
@@ -160,8 +160,15 @@ export default class QleDataTable extends LightningElement {
             let dataRow = event.detail.row;
             let row = this.quoteLinesCopy.findIndex(x => x.id === dataRow.id);
             this.popup = "Eliminado: " + dataRow.name + " Row: " + row;
-            this.quoteLinesCopy.splice(row,1); 
-            this.quoteLines =  this.quoteLinesCopy;
+            
+            if (this.quoteLinesCopy.length > 1){
+                this.quoteLinesCopy.splice(row,1); 
+            }
+            else {
+                this.quoteLinesCopy = []; 
+            }
+            
+            //this.quoteLinesCopy =  this.quoteLinesCopy;
         }
     }
 
@@ -184,6 +191,8 @@ export default class QleDataTable extends LightningElement {
         const sizes = event.detail.columnWidths;
     }
 
+
+    //BUTTON TO ACTIVE THE APEX SAVERS. 
     @api sending; 
     
     handleSend(event){
@@ -194,11 +203,23 @@ export default class QleDataTable extends LightningElement {
         
         saveQuote({quoteId: this.recordId , quoteLines: this.sending})
         .then((result) => {
-            console.log("Working");
+            console.log("Testing with saveQuote: Working Fine");
             console.log(result);
         })
         .catch((error) => {
-            console.log(error);
+            //console.log(error);
+            console.log("saveQuote is not working");
+            console.log(error.status + " " + error.body.message);
+        })
+
+        saveAndCalculateQuote({quoteId: this.recordId , quoteLines: this.sending})
+        .then((result) => {
+            console.log("TOTAL value");
+            console.log(result);
+        })
+        .catch((error) => {
+            //console.log(error);
+            console.log("THIS ERROR IS THE CONVERTION IN APEX")
             console.log(error.status + " " + error.body.message);
         })
 

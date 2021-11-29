@@ -8,13 +8,13 @@
     
     <p class="slds-align_absolute-center" style="background-color:SlateBlue;"><b><lightning-formatted-text value={popup}></lightning-formatted-text></b></p>
     <div class="slds-align_absolute-center">
-        <lightning-datatable key-field="id" data={quoteLines} columns={columns} onrowaction={handleRowAction} onrowselection={getSelectedName}></lightning-datatable>
+        <lightning-datatable key-field="id" data={quoteLinesCopy} columns={columns} onrowaction={handleRowAction} onrowselection={getSelectedName}></lightning-datatable>
     </div>
-            
+    <!--   
     <div>
        <lightning-datatable key-field="id" data={quoteLinesCopy} columns={columns} onrowaction={handleRowAction} onrowselection={getSelectedName}></lightning-datatable>
     </div>
-
+    -->  
      <!--Popup starts-->
     <template if:true={modalContainer}>
         <section  class="slds-modal slds-fade-in-open">
@@ -38,19 +38,11 @@
                                 <!--<p>QuoteLine ID: {quoteLineRow.id} - QuoteLine Name: {quoteLineRow.name}</p>-->
                                 <template if:true={tiersSize.id}>
                                     <lightning-datatable key-field="id" data={tiersData} columns={columnsTiers} hide-checkbox-column=true onresize={handleResize}></lightning-datatable>
-                                    <!--
-                                    <p>
-                                        Tiers ID: {tiersSize.id},
-                                        NAME :{tiersSize.name},
-                                        UPPERBOUND: {tiersSize.upperBound}
-                                    </p>
-                                    -->
+                                   
                                 </template>
                                 <template if:false={tiersSize.id}>
                                     <h2 class="slds-text-heading_medium slds-m-bottom_medium slds-align_absolute-center" >THERE ARE NOT TIERS IN THIS QUOTE LINE</h2>
                                 </template>
-                                <!--
-                                -->
                             </template>
                         </template>
                         <template if:false={clickedButtonLabel}>
@@ -59,33 +51,11 @@
                                 <template if:true={tiersSize.id}>
                                     <p>CHANGE WITH CONTRACTS</p>
                                     <lightning-datatable key-field="id" data={tiersData} columns={columnsContracts} hide-checkbox-column=true onresize={handleResize}></lightning-datatable>
-                                    <!--
-                                    <p>
-                                        Tiers ID: {tiersSize.id},
-                                        NAME :{tiersSize.name},
-                                        UPPERBOUND: {tiersSize.upperBound}
-                                    </p>
-                                    -->
                                 </template>
                                 <template if:false={tiersSize.id}>
                                     <h2 class="slds-text-heading_medium slds-m-bottom_medium slds-align_absolute-center" >THERE ARE NOT CONTRACTS IN THIS QUOTE LINE</h2>
                                 </template>
-                                <!--
-                                -->
                             </template>
-                            <!--
-                            <table class="slds-table slds-table_bordered slds-table_col-bordered slds-table_cell-buffer">
-                                <thead>  <tr>
-                                     <th>Contract</th>
-                                     <th>Effective Date</th>
-                                     <th>Price</th>
-                                </tr> </thead>
-                                <tbody> <tr>
-                                     <td>D</td>
-                                     <td>E</td>
-                                     <td>F</td>
-                                </tr> </tbody>   
-                            </table>-->
                         </template>
                     </lightning-card>
                  </div>

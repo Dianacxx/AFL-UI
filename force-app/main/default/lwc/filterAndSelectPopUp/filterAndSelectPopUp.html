@@ -1,0 +1,50 @@
+<template>
+        <section  class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!--HEAD-->
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModalAction}>
+                       <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                    </button>
+                    <h2 class="slds-text-heading_medium slds-hyphenate">Filter & Select</h2>
+                 </header>
+                 <!--BODY-->
+                 <div class="slds-modal__content slds-p-around_large">
+                    <!--<lightning-card class="slds-size_large">-->
+                        <lightning-tabset class="slds-m-left_large">
+                            <!--FILTER TAB-->
+                            <lightning-tab label="Filter">
+                                <div class="slds-grid slds-gutters slds-m-left_large">
+                                    <lightning-combobox name="FiberCount" label="Fiber Count" value={value} placeholder="Select an Option" options={options} onchange={handleChange} ></lightning-combobox>
+                                    <lightning-combobox name="JacketType" label="Jacket Type" value={value} placeholder="Select an Option" options={options} onchange={handleChange} class="slds-m-left_small" ></lightning-combobox>
+                                    <lightning-combobox name="ArmorType" label="Armor Type" value={value} placeholder="Select an Option" options={options} onchange={handleChange} class="slds-m-left_small" ></lightning-combobox>
+                                    <lightning-button variant="brand" label="Clear Filters" title="Clear"  onclick={clearFilters} class="slds-m-left_small slds-m-top_large"></lightning-button>
+                                </div>
+                                <div class="slds-grid slds-gutters slds-m-left_large">
+                                    <lightning-combobox name="SubUnit" label="SubUnit" value={value} placeholder="Select an Option" options={options} onchange={handleChange} ></lightning-combobox>
+                                    <lightning-combobox name="SubUnit" label="SubUnit" value={value} placeholder="Select an Option" options={options} onchange={handleChange} class="slds-m-left_small" ></lightning-combobox>
+                                </div>
+                                <div class="slds-grid slds-gutters slds-m-left_large slds-m-top_medium">
+                                    <h1 style="color: gray;" class="slds-text-heading_large">Add Products</h1>
+                                </div>
+                                <div class="slds-grid slds-gutters slds-m-left_large slds-m-top_medium">
+                                    <lightning-icon icon-name="standard:filter" alternative-text="filter" size="small" class=" slds-m-right_small"></lightning-icon>
+                                    <p style="color: red;">Filtered, {recordsAmount} records displayed</p>
+                                </div>
+                            </lightning-tab>
+                            <!--REVIEW TAB-->
+                            <lightning-tab label="Review">
+                                Review
+                            </lightning-tab>
+                        </lightning-tabset>
+                    <!--</lightning-card>-->
+                 </div>
+                <!--BUTTOM-->
+                <footer class="slds-modal__footer">        
+                    <lightning-button variant="brand" label="Add & Review" title="Add"  onclick={addAndReview} class="slds-m-right_small"></lightning-button>
+                    <lightning-button variant="brand" label="Cancel" title="Close"  onclick={closeModalAction}></lightning-button>
+               </footer> 
+            </div>
+        </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template>

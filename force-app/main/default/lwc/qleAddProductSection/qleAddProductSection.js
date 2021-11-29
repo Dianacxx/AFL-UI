@@ -94,7 +94,7 @@ export default class QleAddProductSection extends NavigationMixin(LightningEleme
     }
 
     //NAVIGATION TO PRODUCT SELECTION PAGE
-    navitageToLWCWithoutAura(event) {
+    navitageToProductSelection(event) {
         event.preventDefault();
         let componentDef = {
             componentDef: "c:uiProductSelection",
@@ -131,12 +131,16 @@ export default class QleAddProductSection extends NavigationMixin(LightningEleme
     }
     handleMessage(message) { 
         if (message.check == 'PopUpOrder'){
+            this.ElementList = [];
             this.quoteLinesOrder = message.dataTable;
             this.longitud = this.quoteLinesOrder.length; 
+            if (this.longitud <=  this.ElementList.length){
+                this.PopUpReorder = 'Hey';
+            }
             for(let i=0; i< this.longitud; i++){
                 this.ElementList.push(this.quoteLinesOrder[i]); 
             } 
-            this.PopUpReorder = message.check;
+            //this.PopUpReorder = message.check;
             console.log(this.quoteLinesOrder)
         }
     }

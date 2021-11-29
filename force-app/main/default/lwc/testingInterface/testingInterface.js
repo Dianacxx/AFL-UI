@@ -1,7 +1,7 @@
 import { api, LightningElement, track, wire } from 'lwc';
 /** get the current Quote's ID */
 // import Id from '@salesforce/sbqq__quote__c/Id';
-import printQuote from '@salesforce/apex/QuoteController.printQuote';
+import printQuote from '@salesforce/apex/QuoteController.printQuoteInfo';
 import addQuoteLine from '@salesforce/apex/QuoteController.addQuoteLine';
 
 export default class TestingInterface extends LightningElement {

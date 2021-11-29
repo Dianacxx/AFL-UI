@@ -1,5 +1,15 @@
 <template>
     <div class="slds-p-around_medium lgc-bg">
-        <lightning-tree items={items} header="Roles"></lightning-tree>
+        <div class="slds-m-bottom_small">
+            <lightning-button label="Collapse All" onclick={clickToCollapseAll} class="slds-m-right_small"></lightning-button>
+            <lightning-button label="Expand All" onclick={clickToExpandAll}></lightning-button>
+        </div>
+        <lightning-tree-grid class="slds-truncate" columns = {columns} data = {gridData} key-field = "Id"
+                                hide-checkbox-column = true  onrowaction={handleRowAction} >
+        </lightning-tree-grid>
     </div>
+    <template if:true={filterProduct}>
+        <c-filter-and-select-pop-up onclose={closeFilterProduct}></c-filter-and-select-pop-up>
+    </template>
+    
 </template>
