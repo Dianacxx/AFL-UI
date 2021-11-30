@@ -1,5 +1,6 @@
 <template>
     <lightning-card icon-name="standard:quotes">
+        <lightning-spinner if:true={isLoadingHeader} alternative-text="Loading" variant="inverse" size="small"></lightning-spinner>
         <template if:true={quoteDetail}>
             <header slot="title" class="slds-page-header">
                 <h1><span class="slds-page-header__title slds-truncate">{quoteDetail.name}</span></h1>

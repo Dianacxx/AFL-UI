@@ -7,6 +7,7 @@ export default class QleShowHeader extends LightningElement {
     
     @track quoteDetail;
     @api recordId;
+    @track isLoadingHeader = true; 
 
     //Quote data
     @wire(printQuoteInfo, {quoteId: '$recordId'})
@@ -14,6 +15,7 @@ export default class QleShowHeader extends LightningElement {
         if (data){
             this.quoteDetail = JSON.parse(data);
             this.error = undefined;
+            this.isLoadingHeader = false; 
         } else if (error){
             this.error = JSON.parse(error.body.message);
             this.quoteDetail = undefined; 

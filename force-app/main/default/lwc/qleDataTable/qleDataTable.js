@@ -3,6 +3,7 @@ import printQuoteLines from '@salesforce/apex/QuoteController.printQuoteLines';
 //import addQuoteLine from '@salesforce/apex/QuoteController.addQuoteLine'; 
 import saveAndCalculateQuote from '@salesforce/apex/QuoteController.saveAndCalculateQuote';
 import saveQuote from '@salesforce/apex/QuoteController.saveQuote';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 
 import { publish, subscribe, MessageContext } from 'lightning/messageService';
@@ -50,10 +51,12 @@ export default class QleDataTable extends LightningElement {
     @track columns; 
     @api columnsTiers = COLUMNS_TIERS;   
     @api columnsContracts = COLUMNS_CONTRACTS; 
-
+    @track isLoading = true; 
     
     @track quoteLines = []; 
     @track quoteLinesCopy = []; 
+    @track quoteLinesEdit = [];
+    @track quoteLinesDeleted = []; 
     copyQL = false; 
     @track aux = 1; //To change columns
     @track aux2 = 0; //To add products to list 
@@ -64,6 +67,22 @@ export default class QleDataTable extends LightningElement {
     @track modalContainer = false; //To open pop-up
     @track tiersSize = []; //To get tiers information
 
+    draftValues = [];
+    //Editing Table
+    handleSave(event){
+        this.quoteLinesEdit = event.detail.draftValues; 
+        this.popup = "Table Changed, First row Id changed" + this.quoteLinesEdit[0].id; 
+
+        for (let i = 0; i<this.quoteLinesEdit.length; i++){
+            const index = this.quoteLinesCopy.findIndex(x => x.id === this.quoteLinesEdit[i].id);
+            this.quoteLinesCopy[index] =  [...this.quoteLinesEdit[i]]; 
+        }
+        this.quoteLinesCopy = this.quoteLinesCopy;
+        //Alert user when save the values
+        const evt = new ShowToastEvent({ title: 'Changes on Table done', message: 'Changes on Table done',
+            variant: 'success', mode: 'dismissable' });
+        this.dispatchEvent(evt);
+    }
 
     //Quotelines data
     @wire(printQuoteLines, {quoteId: '$recordId'})
@@ -71,6 +90,7 @@ export default class QleDataTable extends LightningElement {
     {
         if (data){
             this.quoteLines = JSON.parse(data);
+            this.isLoading = false; 
             if (!this.copyQL){
                 this.quoteLinesCopy = this.quoteLines; 
                 this.copyQL = true; 
@@ -115,10 +135,22 @@ export default class QleDataTable extends LightningElement {
             };
             publish(this.messageContext, TABLE_CHANNEL, payload);
         }
+        else if (message.recordData == 'Deleting'){
+            this.popup = 'Deleting'; 
+            this.quoteLinesCopy = message.recordId;
+            let payload = { 
+                recordId: null,
+                recordData: 'Done'
+            };
+            publish(this.messageContext, QLE_CHANNEL, payload);
+            console.log('When Done '+payload.recordData);
+        }
     }
     connectedCallback() {
         this.subscribeToMessageChannel();
     }
+
+    
     //ASK IF THIS IS THE METHOD TO ADD THOSE
     //@wire(addQuoteLine,{quoteId: '$recordId', productId: '$productId'})
 
@@ -148,35 +180,36 @@ export default class QleDataTable extends LightningElement {
 
             }*/ 
             this.tiersData = [ {id: this.tiersSize.id, name: this.tiersSize.name, upperBound: this.tiersSize.upperBound}];
-            /*[
-                {id: '123', name: 'Tier 1', upperBound:5},
-                {id: '124', name: 'Tier 2', upperBound:6},
-                {id: '122', name: 'Tier 3', upperBound:9}
-            ];*/
-            //
             this.modalContainer = true;
 
         } else if(event.detail.action.name === 'Delete') {
             let dataRow = event.detail.row;
-            let row = this.quoteLinesCopy.findIndex(x => x.id === dataRow.id);
-            this.popup = "Eliminado: " + dataRow.name + " Row: " + row;
             
-            if (this.quoteLinesCopy.length > 1){
-                this.quoteLinesCopy.splice(row,1); 
+            this.quoteLinesDeleted = this.quoteLinesCopy; 
+            let row = this.quoteLinesDeleted.findIndex(x => x.id === dataRow.id);
+            this.popup = "Eliminado: " + dataRow.name + " Row: " + row;
+            if (this.quoteLinesDeleted.length > 1){
+                this.quoteLinesDeleted.splice(row,1); 
             }
             else {
-                this.quoteLinesCopy = []; 
+                this.quoteLinesDeleted = []; 
             }
+            let payload = { 
+                recordId: this.quoteLinesDeleted,
+                recordData: 'Deleting'
+            };
+            console.log('When Delete ' +payload.recordData);
+            publish(this.messageContext, QLE_CHANNEL, payload);
             
-            //this.quoteLinesCopy =  this.quoteLinesCopy;
         }
     }
+
+
 
     //To close the pop-up
     closeModalAction(){
         this.modalContainer=false;
     }
-
 
     //Table information in Tiers and Contracts
     clickedButtonLabel = true;

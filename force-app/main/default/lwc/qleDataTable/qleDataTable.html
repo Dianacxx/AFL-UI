@@ -1,14 +1,13 @@
 <template>
-    <lightning-button variant="success" 
-    label="Sending Array of quote lines" title="Sending QL" 
-    onclick={handleSend}
-    class="slds-align_absolute-center"> </lightning-button>
+    <lightning-spinner if:true={isLoading} alternative-text="Loading" variant="inverse" size="small"></lightning-spinner>
+    <lightning-button variant="success"  label="Sending Array of quote lines" title="Sending QL" onclick={handleSend} class="slds-align_absolute-center"> </lightning-button>
     
     <!--VARIABLE popup HELPS TO SEE ACTIONS HAPPENING-->
-    
     <p class="slds-align_absolute-center" style="background-color:SlateBlue;"><b><lightning-formatted-text value={popup}></lightning-formatted-text></b></p>
+    
     <div class="slds-align_absolute-center">
-        <lightning-datatable key-field="id" data={quoteLinesCopy} columns={columns} onrowaction={handleRowAction} onrowselection={getSelectedName}></lightning-datatable>
+        
+        <lightning-datatable key-field="id" draft-values={draftValues} data={quoteLinesCopy} columns={columns} onrowaction={handleRowAction} onrowselection={getSelectedName} onsave={handleSave}></lightning-datatable>
     </div>
     <!--   
     <div>

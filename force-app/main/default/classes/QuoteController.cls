@@ -245,47 +245,45 @@ public with sharing class QuoteController {
     public static String saveAndCalculateQuote(String quoteId, String quoteLines){
         QuoteReader quoteReader = new QuoteReader();
         QuoteModel quote = quoteReader.read(quoteId);
-        // List<QuoteLineModel> untypedQuoteLines = (List<QuoteLineModel>) JSON.deserializeUntyped(quoteLines);
-        // Map<String, QuoteLineModel> untypedQuoteLines = (Map<String, QuoteLineModel>) JSON.deserialize(quoteLines, Map<String, QuoteLineModel>.class);
-        Map<String,Object> untypedQuoteLines = (Map<String,Object>) JSON.deserializeUntyped(quoteLines);
-        System.debug(untypedQuoteLines);
         QuoteSaver saver = new QuoteSaver();
         QuoteCalculator calculator = new QuoteCalculator();
-        String quoteLineID = String.valueOf(untypedQuoteLines.get('id'));
-        String fieldSetJSON = displayFieldSet(quoteId);
-        List<FieldSetWrapperClass> fieldset = (List<FieldSetWrapperClass>)JSON.deserialize(fieldSetJSON,List<FieldSetWrapperClass>.class);
+
+        List<QuoteLineModel> quoteLinesToInsert = new List<QuoteLineModel>();
+        //Gets the quote lines and deserialize it into a quote line wrapper
+        List<QuoteLineWrapperClass> untypedQuoteLines = (List<QuoteLineWrapperClass>) JSON.deserialize(quoteLines, List<QuoteLineWrapperClass>.class);
+        System.debug('QUOTE LINES FROM JSON: ' + untypedQuoteLines);
+        //Check all the existig quote lines in salesforce
         List<SBQQ__QuoteLine__c> existingQuoteLines = [SELECT ID FROM SBQQ__QuoteLine__c];
         Set<Id> quoteLineIDs = new Set<Id>();
-        System.debug(fieldset);
-        List<QuoteLineModel> quoteLinesToInsert = new List<QuoteLineModel>();
+
         //Add the existing quote line ids to a set
         for (SBQQ__QuoteLine__c line : existingQuoteLines) {
             quoteLineIDs.add(line.id);
         }
-
-        for (Integer i; i==0; i<untypedQuoteLines.size()) {
-            if (quoteLineIDs.contains(String.valueOf(untypedQuoteLines.get('id')))) {
+        for (QuoteLineWrapperClass line : untypedQuoteLines) {
+            String quoteLineID = String.valueOf(line.id);
+            //Checks if the quote line already exists in salesforce, if it does, it updates the values.
+            if (quoteLineIDs.contains(quoteLineID)) {
                 QuoteLineModel quoteLine = new QuoteLineModel();
+                //Looks for the existing quote line with the same ID and inserts it in the quote line model.
                 quoteLine.setRecord([SELECT ID, SBQQ__Quote__c, SBQQ__Product__c FROM SBQQ__QuoteLine__c WHERE ID =: quoteLineID LIMIT 1]);
-                
-                // quoteLine.record.SBQQ__Quantity__c = Decimal.valueOf(untypedQuoteLines.get('quantity'));
+                quoteLine.record.SBQQ__Quantity__c = Decimal.valueOf(10);
                 quoteLinesToInsert.add(quoteLine);
             }
         }
         
-
+        //Inserts the new version of the quote lines into the quote line model
         quote.setLineItems(quoteLinesToInsert);
-        // quote.setLineItems(untypedQuoteLines.values());
-        System.debug('Qoute line info : ' + quoteLinesToInsert);
-       // quote.setLineItems(untypedQuoteLines);
-        // QuoteModel quote = quoteReader.read('a0q5f0000013pc3AAA');
-        
-        // for (QuoteLineModel line : untypedQuote.lineItems) {
-        //quote.lineItems[0].record.SBQQ__Quantity__c = 14;    
-        // }
+        System.debug(' size : ' +quoteLinesToInsert.size() + 'New Line Items : ' + quoteLinesToInsert );
+       
+        for (QuoteLineModel line : quote.getLineItems()) {
+            System.debug('quantity ' +  line.record.SBQQ__Quantity__c);
+        }
+        //Saves te new version of the quote
         QuoteModel savedQuote = saver.save(quote);
         calculator.calculate(savedQuote, 'MyCallback');
         String total = String.valueOf(savedQuote.netTotal);
+        List<QuoteLineModel> newQuoteLines = quote.getLineItems();
         
         System.debug('TOTAL ' + total);
 
