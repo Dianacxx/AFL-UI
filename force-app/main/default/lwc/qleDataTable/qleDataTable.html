@@ -1,19 +1,22 @@
 <template>
-    <lightning-spinner if:true={isLoading} alternative-text="Loading" variant="inverse" size="small"></lightning-spinner>
     <lightning-button variant="success"  label="Sending Array of quote lines" title="Sending QL" onclick={handleSend} class="slds-align_absolute-center"> </lightning-button>
     
     <!--VARIABLE popup HELPS TO SEE ACTIONS HAPPENING-->
     <p class="slds-align_absolute-center" style="background-color:SlateBlue;"><b><lightning-formatted-text value={popup}></lightning-formatted-text></b></p>
-    
-    <div class="slds-align_absolute-center">
-        
-        <lightning-datatable key-field="id" draft-values={draftValues} data={quoteLinesCopy} columns={columns} onrowaction={handleRowAction} onrowselection={getSelectedName} onsave={handleSave}></lightning-datatable>
-    </div>
-    <!--   
+    <lightning-spinner if:true={isLoading} alternative-text="Loading" size="medium"></lightning-spinner>
     <div>
-       <lightning-datatable key-field="id" data={quoteLinesCopy} columns={columns} onrowaction={handleRowAction} onrowselection={getSelectedName}></lightning-datatable>
+        <!--PAGINATION-->
+        <div class="slds-align_absolute-center">
+            <lightning-button label="Previous" icon-name="utility:chevronleft" onclick={previousHandler} class=" slds-align_absolute-center slds-var-p-right_medium"></lightning-button>
+            <p class="slds-align_absolute-center"><b> Page {page} of {totalPage}</b></p>
+            <lightning-button label="Next" icon-name="utility:chevronright" icon-position="right" onclick={nextHandler} class="slds-align_absolute-center slds-var-p-left_medium"></lightning-button>
+        </div>    
+        <!--DATATABLE-->
+        <div class="slds-align_absolute-center">
+            <lightning-datatable key-field="id" draft-values={draftValues} data={dataPages} columns={columns} onrowaction={handleRowAction} onrowselection={getSelectedName} onsave={handleSave}></lightning-datatable>
+        </div>
     </div>
-    -->  
+     
      <!--Popup starts-->
     <template if:true={modalContainer}>
         <section  class="slds-modal slds-fade-in-open">

@@ -67,19 +67,67 @@ export default class QleDataTable extends LightningElement {
     @track modalContainer = false; //To open pop-up
     @track tiersSize = []; //To get tiers information
 
+    //Pagination
+    @track startingRecord = 1;
+    @track endingRecord = 0; 
+    @track page = 1; 
+    @track totalRecountCount = 0;
+    @track dataPages = []; 
+    @track totalPage = 0;
+    @track pageSize = 10; 
+    
+    previousHandler() {
+        if (this.page > 1) {
+            this.page = this.page - 1; //decrease page by 1
+            this.displayRecordPerPage(this.page);
+        }
+    }
+    nextHandler() {
+        if((this.page<this.totalPage) && this.page !== this.totalPage){
+            this.page = this.page + 1; //increase page by 1
+            this.displayRecordPerPage(this.page);            
+        }             
+    }
+    displayRecordPerPage(page){
+
+        this.startingRecord = ((page -1) * this.pageSize) ;
+        this.endingRecord = (this.pageSize * page);
+
+        this.endingRecord = (this.endingRecord > this.totalRecountCount) 
+                            ? this.totalRecountCount : this.endingRecord; 
+
+        this.dataPages = this.quoteLinesCopy.slice(this.startingRecord, this.endingRecord);
+
+        this.startingRecord = this.startingRecord + 1;
+    }    
+
+
+
     draftValues = [];
     //Editing Table
     handleSave(event){
         this.quoteLinesEdit = event.detail.draftValues; 
-        this.popup = "Table Changed, First row Id changed" + this.quoteLinesEdit[0].id; 
-
+        this.popup = "Table Changed"; 
+        for (let i =0; i< this.quoteLinesEdit.length; i++){
+            console.log(this.quoteLinesEdit[i].id);
+            console.log(this.quoteLinesEdit[i].name);
+        }
+        /*
         for (let i = 0; i<this.quoteLinesEdit.length; i++){
             const index = this.quoteLinesCopy.findIndex(x => x.id === this.quoteLinesEdit[i].id);
             this.quoteLinesCopy[index] =  [...this.quoteLinesEdit[i]]; 
+            const index2 = this.dataPages.findIndex(x => x.id === this.quoteLinesEdit[i].id);
+            this.dataPages[index2] =  [...this.quoteLinesEdit[i]]; 
         }
-        this.quoteLinesCopy = this.quoteLinesCopy;
+        
+        
+        this.totalRecountCount = this.quoteLinesCopy.length;
+        this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
+        this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
+        this.endingRecord = this.pageSize;
         //Alert user when save the values
-        const evt = new ShowToastEvent({ title: 'Changes on Table done', message: 'Changes on Table done',
+        */
+        const evt = new ShowToastEvent({ title: 'Editing Table Values', message: 'Changes on Table done',
             variant: 'success', mode: 'dismissable' });
         this.dispatchEvent(evt);
     }
@@ -90,12 +138,17 @@ export default class QleDataTable extends LightningElement {
     {
         if (data){
             this.quoteLines = JSON.parse(data);
-            this.isLoading = false; 
+            
             if (!this.copyQL){
-                this.quoteLinesCopy = this.quoteLines; 
+                this.quoteLinesCopy = this.quoteLines;
+                this.totalRecountCount = this.quoteLinesCopy.length;  
+                this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
+                this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
+                this.endingRecord = this.pageSize;
                 this.copyQL = true; 
             }
             this.error = undefined;
+            this.isLoading = false; 
             //To change the columns value
             if (this.aux === 1){
                 this.columns = COLUMNS; 
@@ -122,6 +175,10 @@ export default class QleDataTable extends LightningElement {
         if (message.recordData == 'Checked'){
             this.productId = message.recordId;
             this.quoteLinesCopy = [...this.quoteLinesCopy, {id: message.recordId[this.aux2], name: 'New Addition'}];
+            this.totalRecountCount = this.quoteLinesCopy.length; 
+            this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
+            this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
+            this.endingRecord = this.pageSize;
             this.aux2 += 1; 
         }
         else if (message.recordData == 'Cloned'){
@@ -138,6 +195,10 @@ export default class QleDataTable extends LightningElement {
         else if (message.recordData == 'Deleting'){
             this.popup = 'Deleting'; 
             this.quoteLinesCopy = message.recordId;
+            this.totalRecountCount = this.quoteLinesCopy.length; 
+            this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
+            this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
+            this.endingRecord = this.pageSize;
             let payload = { 
                 recordId: null,
                 recordData: 'Done'
@@ -160,7 +221,12 @@ export default class QleDataTable extends LightningElement {
             for (let i = 0; i < selectedRows.length; i++) {
                 //alert('You selected: ' + selectedRows[i].name);
                 this.quoteLinesCopy = [...this.quoteLinesCopy, selectedRows[i]];
+                 
             }
+            this.totalRecountCount = this.quoteLinesCopy.length; 
+            this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize);
+            this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
+            this.endingRecord = this.pageSize;
             this.cloneRows = false;
         }
     }
@@ -171,6 +237,11 @@ export default class QleDataTable extends LightningElement {
             this.popup ==="Clickeado!" ? this.popup="Desclickeado!" : this.popup="Clickeado!";
             let dataRow = event.detail.row;
             let row = this.quoteLinesCopy.findIndex(x => x.id === dataRow.id);
+            this.totalRecountCount = this.quoteLinesCopy.length; 
+            this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize);
+            this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
+            this.endingRecord = this.pageSize;
+
             this.quoteLineRow = dataRow;
             this.clickedButtonLabel = true;
             this.tiersSize = JSON.parse(this.quoteLineRow.tiers);
@@ -231,7 +302,7 @@ export default class QleDataTable extends LightningElement {
     handleSend(event){
 
         console.log('BUTTON CLICKED');
-        this.sending = JSON.stringify(this.quoteLines);
+        this.sending = JSON.stringify(this.quoteLinesCopy);
         this.popup = 'Sending To Apex';
         
         saveQuote({quoteId: this.recordId , quoteLines: this.sending})
