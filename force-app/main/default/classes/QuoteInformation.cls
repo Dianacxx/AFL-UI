@@ -40,6 +40,20 @@ public with sharing class QuoteInformation {
         }
     }
 
+    @AuraEnabled(cacheable=true)
+    public static String levelsOfProductsACA(){
+        //SBQQ__ConfigurationType__c if is bundle? 
+        List<Product2> products = [Select Name, Type_Product__c, Selection_Type__c, Level_1__c, Level_2__c From Product2 WHERE (Level_1__c ='ACA')]; 
+        return JSON.serialize(products);
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static String levelsOfProductsConnectivity(){
+        //SBQQ__ConfigurationType__c if is bundle? 
+        List<Product2> products = [Select Name, Type_Product__c, Selection_Type__c, Level_1__c, Level_2__c From Product2 WHERE (Level_1__c ='Connectivity')]; 
+        return JSON.serialize(products);
+    }
+
     public class QuoteLineWrapperClass{
         String id;
         String name;

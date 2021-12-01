@@ -2,6 +2,7 @@ public with sharing class QuoteController {
     public class QuoteWrapperClass{
         String name;
         String status;
+        Decimal totalValue;
         
      }
     public class QuoteLineWrapperClass{
@@ -127,8 +128,9 @@ public with sharing class QuoteController {
 
             //system.debug(wrapper);
             System.debug('products - '+ line.record.SBQQ__Product__r.Name);
-            System.debug('tiers - '+ line.record.SBQQ__DiscountTier__c);
-            System.debug('tiers information- ' + wrapper.tiers);
+            System.debug('Quantity - '+ line.record.SBQQ__Quantity__c);
+            // System.debug('tiers - '+ line.record.SBQQ__DiscountTier__c);
+            // System.debug('tiers information- ' + wrapper.tiers);
             displayQuoteLine.add (wrapper);
         }
 
@@ -142,12 +144,14 @@ public with sharing class QuoteController {
         QuoteReader quoteReader = new QuoteReader();
         // QuoteModel quote = quoteReader.read('a0q5f0000013pc3AAA');
         QuoteModel quote = quoteReader.read(quoteId);
+        SBQQ__Quote__c quoteInfo = [SELECT SBQQ__ListAmount__c FROM SBQQ__Quote__c WHERE ID=:quoteId];
 
         QuoteWrapperClass wrapper = new QuoteWrapperClass();
         wrapper.name = quote.record.name;
         wrapper.status = quote.record.SBQQ__Status__c;
+        wrapper.totalValue = quoteInfo.SBQQ__ListAmount__c;
         
-       System.debug('name '+quote.record.Name + ' Status ' + quote.record.SBQQ__Status__c);
+       System.debug('total '+quote.record.SBQQ__ListAmount__c + ' Status ' + quote.record.SBQQ__Status__c);
        return JSON.serialize(wrapper);
     } 
     @AuraEnabled(cacheable=true)
@@ -241,12 +245,10 @@ public with sharing class QuoteController {
         System.debug(fields.size());
         return JSON.serialize(fields);
     }
-    @AuraEnabled (cacheable = true)
-    public static String saveAndCalculateQuote(String quoteId, String quoteLines){
+    @AuraEnabled
+    public static Decimal saveAndCalculateQuote(String quoteId, String quoteLines){
         QuoteReader quoteReader = new QuoteReader();
         QuoteModel quote = quoteReader.read(quoteId);
-        QuoteSaver saver = new QuoteSaver();
-        QuoteCalculator calculator = new QuoteCalculator();
 
         List<QuoteLineModel> quoteLinesToInsert = new List<QuoteLineModel>();
         //Gets the quote lines and deserialize it into a quote line wrapper
@@ -267,7 +269,16 @@ public with sharing class QuoteController {
                 QuoteLineModel quoteLine = new QuoteLineModel();
                 //Looks for the existing quote line with the same ID and inserts it in the quote line model.
                 quoteLine.setRecord([SELECT ID, SBQQ__Quote__c, SBQQ__Product__c FROM SBQQ__QuoteLine__c WHERE ID =: quoteLineID LIMIT 1]);
-                quoteLine.record.SBQQ__Quantity__c = Decimal.valueOf(10);
+                quoteLine.record.SBQQ__Quantity__c = Decimal.valueOf(5);
+                quoteLinesToInsert.add(quoteLine);
+            }else {
+                QuoteLineModel quoteLine = new QuoteLineModel();
+                SBQQ__QuoteLine__c newQuoteLine = new SBQQ__QuoteLine__c ();
+                newQuoteLine.id = line.id;
+                newQuoteLine.SBQQ__Quantity__c = Decimal.valueOf(line.quantity);
+
+                //Inserts the record to the Quote Line model
+                quoteLine.setRecord(newQuoteLine);
                 quoteLinesToInsert.add(quoteLine);
             }
         }
@@ -276,18 +287,20 @@ public with sharing class QuoteController {
         quote.setLineItems(quoteLinesToInsert);
         System.debug(' size : ' +quoteLinesToInsert.size() + 'New Line Items : ' + quoteLinesToInsert );
        
-        for (QuoteLineModel line : quote.getLineItems()) {
+        
+
+        //Saves te new version of the quote
+        QuoteModel savedQuote = quoteSaverMethod(quote);
+        for (QuoteLineModel line : savedQuote.getLineItems()) {
             System.debug('quantity ' +  line.record.SBQQ__Quantity__c);
         }
-        //Saves te new version of the quote
-        QuoteModel savedQuote = saver.save(quote);
-        calculator.calculate(savedQuote, 'MyCallback');
-        String total = String.valueOf(savedQuote.netTotal);
-        List<QuoteLineModel> newQuoteLines = quote.getLineItems();
-        
-        System.debug('TOTAL ' + total);
+        //Calculates the totals of the nw version of the quote            
+        QuoteCalculatorMethod(savedQuote);
 
-        return JSON.serialize(total);
+        SBQQ__Quote__c quoteInfo = [SELECT SBQQ__ListAmount__c FROM SBQQ__Quote__c WHERE ID =: quoteId LIMIT 1];
+
+        //Returns the total value
+        return quoteInfo.SBQQ__ListAmount__c;
     }
     @AuraEnabled (cacheable = true)
     public static String saveQuote(String quoteId, String quoteLines){
@@ -297,6 +310,22 @@ public with sharing class QuoteController {
         // QuoteModel quote = quoteReader.read(quoteId);
         // QuoteModel savedQuote = saver.save(quote);
         return quoteLines;
+    }
+    @AuraEnabled 
+    public static QuoteModel quoteSaverMethod (QuoteModel quote){
+        
+        QuoteSaver saver = new QuoteSaver();
+        QuoteModel savedQuote = saver.save(quote);
+
+        return savedQuote;        
+    }
+    @AuraEnabled 
+    public static void QuoteCalculatorMethod (QuoteModel quote){
+        
+        QuoteCalculator calculator = new QuoteCalculator();
+        calculator.calculate(quote, 'MyCallback');
+
+        //return quote.netTotal;        
     }
 
 }

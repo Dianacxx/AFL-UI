@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
+    <masterLabel>ProductPlusQleComms</masterLabel>
+    <isExposed>true</isExposed>
+    <description>Channel between UIs QLE and Poduct Selection</description>
+    <lightningMessageFields>
+        <fieldName>dataInformation</fieldName>
+        <description>data sended</description>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>booleanCheck</fieldName>
+        <description>If is ok or not</description>
+    </lightningMessageFields>
+</LightningMessageChannel>

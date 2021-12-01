@@ -11,6 +11,9 @@ export default class treeProducts extends NavigationMixin( LightningElement ) {
     @api filterProduct = false; 
     @track gridData;
 
+    @api productsList; 
+
+
     @wire(fetchAccounts)
     accountTreeData({ error, data }) {
         if ( data ) {

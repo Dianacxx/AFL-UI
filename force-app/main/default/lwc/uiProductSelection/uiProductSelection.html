@@ -1,4 +1,9 @@
 <template>
+    <template if:true={quoteLines}>
+        <p>FUNCIONA {recordId}</p>
+        <p>{quoteLine1}</p>
+    </template>
+    
     <lightning-card class="slds-box ">
         <div class="slds-grid slds-wrap slds-box slds-theme_shade">
             <div class="slds-col slds-size_1-of-2">
@@ -8,24 +13,25 @@
                 <lightning-button class=" slds-align_absolute-center" variant="brand" label="Save & Exit" icon-name="utility:save" onclick={handleSaveExit}></lightning-button>
             </div>
         </div>
+        <p>{productTab}</p>
         <div class="slds-border_top slds-border_bottom slds-border_left slds-border_right slds-m-left_xx-large slds-m-right_xx-large slds-m-top_x-small">
             <lightning-tabset variant="scoped">
-                <lightning-tab label="ACA">
+                <lightning-tab label="ACA" onactive={handleActive}>
                     <c-tree-products></c-tree-products>
                 </lightning-tab>
-                <lightning-tab label="Connectivity">
+                <lightning-tab label="Connectivity" onactive={handleActive}>
                     <c-tree-products></c-tree-products>
                 </lightning-tab>
-                <lightning-tab label="Fiber Optic Cable">
+                <lightning-tab label="Fiber Optic Cable" onactive={handleActive}>
                     <c-tree-products></c-tree-products>
                 </lightning-tab>
-                <lightning-tab label="Cable">
+                <lightning-tab label="Cable" onactive={handleActive}>
                     <c-tree-products></c-tree-products>
                 </lightning-tab>
-                <lightning-tab label="Test & Inspection">
+                <lightning-tab label="Test & Inspection" onactive={handleActive}>
                     <c-tree-products></c-tree-products>
                 </lightning-tab>
-                <lightning-tab label="Manual Items">
+                <lightning-tab label="Manual Items" onactive={handleActive}>
                     <c-manual-items></c-manual-items>
                 </lightning-tab>
             </lightning-tabset>

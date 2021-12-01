@@ -9,6 +9,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { publish, subscribe, MessageContext } from 'lightning/messageService';
 import QLE_CHANNEL from  '@salesforce/messageChannel/Qle_Comms__c';
 import TABLE_CHANNEL from '@salesforce/messageChannel/Table_Comms__c'; 
+import PPQ_CHANNEL from  '@salesforce/messageChannel/Product_Plus_Qle_Comms__c';
 
 
 
@@ -109,8 +110,11 @@ export default class QleDataTable extends LightningElement {
         this.quoteLinesEdit = event.detail.draftValues; 
         this.popup = "Table Changed"; 
         for (let i =0; i< this.quoteLinesEdit.length; i++){
-            console.log(this.quoteLinesEdit[i].id);
-            console.log(this.quoteLinesEdit[i].name);
+            console.log('Id editada: '+this.quoteLinesEdit[i].id);
+            const index = this.quoteLinesCopy.findIndex(x => x.id === this.quoteLinesEdit[i].id);
+            console.log('Index en quoteLinesCopy '+index); 
+            this.quoteLinesCopy[index] = this.quoteLinesEdit[i];
+            console.log('New data in qlC '+ this.quoteLinesCopy[index].name); 
         }
         /*
         for (let i = 0; i<this.quoteLinesEdit.length; i++){
@@ -210,6 +214,29 @@ export default class QleDataTable extends LightningElement {
     connectedCallback() {
         this.subscribeToMessageChannel();
     }
+
+    //CONNECTION WITH PRODUCT UI
+    @wire(MessageContext)
+    messageContext2;
+    subscribeToMessageChannel() {
+        this.subscription2 = subscribe(
+          this.messageContext2,
+          PPQ_CHANNEL,
+          (message2) => this.handleMessage2(message2)
+        );
+    }
+    handleMessage2(message2) {
+        this.popup = message2.booleanCheck; 
+        if (message2.booleanCheck == 'Send Value FILTER to PRODUCT selection'){
+            console.log('COMM FROM PS TO QLE SUCCESS');
+        }
+        if (message2.booleanCheck == 'Send Value PRODUCT selection to QLE'){
+            console.log('COMM FROM PS TO QLE SUCCESS');
+        }
+
+    }
+
+
 
     
     //ASK IF THIS IS THE METHOD TO ADD THOSE

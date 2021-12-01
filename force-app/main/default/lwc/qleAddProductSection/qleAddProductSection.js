@@ -1,6 +1,6 @@
 import { LightningElement , api, wire, track} from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
-import printListAmount from '@salesforce/apex/QuoteInformation.printListAmount';
+import printQuoteInfo from '@salesforce/apex/QuoteController.printQuoteInfo'; 
 
 import { subscribe, publish, MessageContext } from 'lightning/messageService';
 import QLE_CHANNEL from  '@salesforce/messageChannel/Qle_Comms__c';
@@ -12,7 +12,10 @@ const COLUMNS = [
 ];
 
 export default class QleAddProductSection extends NavigationMixin(LightningElement) {
-    //@api totalQuote = 1345692;
+    //To display the total value
+    @track totalValueQuote; 
+    @track totalValue; 
+    //Reorder the quotelines
     @api recordId;
     @track quoteLinesOrder = []; 
     @track dragStart;
@@ -23,18 +26,17 @@ export default class QleAddProductSection extends NavigationMixin(LightningEleme
     @track ElementList = []; 
     @api longitud; 
       
-      @track PopUpReorder =''; 
-     //---DRAG SITUATION ---------------
+     @track PopUpReorder =''; 
+     
+    //---DRAG SITUATION ---------------
      DragStart(event) {
         this.dragStart = event.target.title;
         event.target.classList.add("drag");
       }
-    
       DragOver(event) {
         event.preventDefault();
         return false;
       }
-    
       Drop(event) {
         event.stopPropagation();
         const DragValName = this.dragStart;
@@ -56,8 +58,20 @@ export default class QleAddProductSection extends NavigationMixin(LightningEleme
     messageContext;
 
     //GETTING LIST AMOUNT TO SHOW IN QUOTE TOTAL VALUE
-    @wire(printListAmount, {quoteId: '$recordId'})
-    totalQuote; 
+    @wire(printQuoteInfo, {quoteId: '$recordId'})
+    quoteTotalValue({error, data}){
+        if (data){
+            this.totalValueQuote = JSON.parse(data);
+            console.log('VALUE RECIVED '+ this.totalValueQuote.totalValue);
+            this.totalValue = this.totalValueQuote.totalValue;
+            this.error = undefined;
+            //this.isLoadingHeader = false; 
+        } else if (error){
+            this.error = JSON.parse(error.body.message);
+            this.totalValueQuote = undefined; 
+            this.totalValue = undefined;
+        }
+    }
 
     //POP UP TO REORDER LINES IN TABLE
     @track isModalOpen = false;
@@ -99,7 +113,8 @@ export default class QleAddProductSection extends NavigationMixin(LightningEleme
         let componentDef = {
             componentDef: "c:uiProductSelection",
             attributes: {
-                recordId: '$recordId'
+                recordId: this.recordId,
+                quoteLines: this.quoteLinesOrder, //THIS HAS TO CHANGE TO quoteLinesCopy
             }
         };
         // Encode the componentDefinition JS object to Base64 format to make it url addressable

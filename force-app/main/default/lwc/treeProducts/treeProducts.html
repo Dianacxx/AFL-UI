@@ -1,4 +1,5 @@
 <template>
+
     <div class="slds-p-around_medium lgc-bg">
         <div class="slds-m-bottom_small">
             <lightning-button label="Collapse All" onclick={clickToCollapseAll} class="slds-m-right_small"></lightning-button>
@@ -8,6 +9,7 @@
                                 hide-checkbox-column = true  onrowaction={handleRowAction} >
         </lightning-tree-grid>
     </div>
+    <!--POP UP IF FILTER PRODUCT-->
     <template if:true={filterProduct}>
         <c-filter-and-select-pop-up onclose={closeFilterProduct}></c-filter-and-select-pop-up>
     </template>
