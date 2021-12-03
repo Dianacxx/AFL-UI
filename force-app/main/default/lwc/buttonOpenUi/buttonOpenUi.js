@@ -1,6 +1,7 @@
 import { LightningElement , api, wire} from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import printQuoteLines from '@salesforce/apex/QuoteController.printQuoteLines'; 
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 
 export default class ButtonOpenUi extends NavigationMixin(LightningElement) {
@@ -18,30 +19,39 @@ export default class ButtonOpenUi extends NavigationMixin(LightningElement) {
             this.error = undefined;
             console.log('QuoteLines In String');
             this.isLoading = true; 
+            console.log('Values: '+this.quoteLinesString); 
         } else if (error){
             this.errorString = error.body.message;//JSON.parse(error.body.message); 
             this.quoteLinesString = undefined;
-            console.log('QuoteLines NOT in string'); 
+            console.log('QuoteLines ERROR in string'); 
         }
     }
 
 
      handleNavigate() {
-        var compDefinition = {
-            componentDef: "c:uI",
-            attributes: {
-                recordId: this.recordId,
-                quoteLinesApex:  this.quoteLinesString, 
-                text: 'Recived'
-            }
-        };
-        // Base64 encode the compDefinition JS object
-        var encodedCompDef = btoa(JSON.stringify(compDefinition));
-        this[NavigationMixin.Navigate]({
-            type: 'standard__webPage',
-            attributes: {
-                url: '/one/one.app#' + encodedCompDef
-            }
-        });
+         
+         if (!(this.quoteLinesString == '[]')){
+            var compDefinition = {
+                componentDef: "c:uI",
+                attributes: {
+                    recordId: this.recordId,
+                    quoteLinesApex:  this.quoteLinesString, 
+                    text: 'Recived'
+                }
+            };
+            // Base64 encode the compDefinition JS object
+            var encodedCompDef = btoa(JSON.stringify(compDefinition));
+            this[NavigationMixin.Navigate]({
+                type: 'standard__webPage',
+                attributes: {
+                    url: '/one/one.app#' + encodedCompDef
+                }
+            });
+         }
+        else {
+            const evt = new ShowToastEvent({ title: 'NOT QUOTELINES YET', message: 'CHANGE THIS BEHAVIOR',
+            variant: 'warning', mode: 'dismissable' });
+            this.dispatchEvent(evt);
+        }
     }
 }

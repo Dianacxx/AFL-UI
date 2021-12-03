@@ -29,7 +29,7 @@ export default class QleAddProductSection extends NavigationMixin(LightningEleme
     @track ElementList = []; 
     @api longitud; 
       
-     @track PopUpReorder =''; 
+    @track PopUpReorder =''; 
      
     //---DRAG SITUATION ---------------
      DragStart(event) {
@@ -92,10 +92,20 @@ export default class QleAddProductSection extends NavigationMixin(LightningEleme
     closeModal() {
         this.isModalOpen = false;
     }
+
     submitDetails() {
         // to close modal set isModalOpen tarck value as false
         //Add your code to call apex method or do some processing
+        this.quoteLinesApex = JSON.stringify(this.ElementList);
+        //TO COMMUNICATE THE CHANGES WITH THE PARENTS (TAB SET + UI + ADD PRODUCT)
+        const payload = { 
+            recordId: this.quoteLinesApex,
+            recordData: 'NewOrder'
+        };
+        publish(this.messageContext, QLE_CHANNEL, payload);
+        console.log('HERE REORDERED TABLE '+ this.quoteLinesApex);
         this.isModalOpen = false;
+
     }
 
     //NAVIGATE TO QUOTE RECORD PAGE (MISSING SAVING INFORMATION)
@@ -153,16 +163,20 @@ export default class QleAddProductSection extends NavigationMixin(LightningEleme
     handleMessage(message) { 
         if (message.check == 'PopUpOrder'){
             this.ElementList = [];
+            this.PopUpReorder = 'Hey';
             this.quoteLinesOrder = message.dataTable;
             this.longitud = this.quoteLinesOrder.length; 
+            /*
             if (this.longitud <=  this.ElementList.length){
-                this.PopUpReorder = 'Hey';
-            }
+                
+            }*/
             for(let i=0; i< this.longitud; i++){
                 this.ElementList.push(this.quoteLinesOrder[i]); 
             } 
             //this.PopUpReorder = message.check;
-            console.log(this.quoteLinesOrder)
+            console.log('quoteLinesOrder properties: '+Object.getOwnPropertyNames(this.quoteLinesOrder[0]));
+            console.log('ElementList properties: '+Object.getOwnPropertyNames(this.ElementList[0]));
+
         }
     }
     connectedCallback() {

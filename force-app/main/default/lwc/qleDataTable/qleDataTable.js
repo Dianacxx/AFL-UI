@@ -52,7 +52,7 @@ export default class QleDataTable extends LightningElement {
     @track quoteLines = []; 
     @track quoteLinesCopy = []; 
     @track quoteLinesEdit = [];
-    @track quoteLinesDeleted = []; 
+    //@track quoteLinesDeleted = []; 
     copyQL = false; 
     @track aux = 1; //To change columns
     @track aux2 = 0; //To add products to list 
@@ -77,19 +77,30 @@ export default class QleDataTable extends LightningElement {
 
         //THIS IS GOING TO CHANGE WHEN VALUES RETURNING FROM PS ARE GOOD
         if (!this.quoteLinesApex){
-            this.quoteLinesCopy = [
-                {id: 123, name: 'Change this value'},
-                {id: 321, name: 'with PD returning values'},
-            ];
-            this.totalRecountCount = this.quoteLinesCopy.length;  
-            this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
-            this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
-            this.endingRecord = this.pageSize;
+            //Quotelines data
+            printQuoteLines({quoteId: '$recordId'})
+            .then((data) => {
+                this.quoteLinesApex = data; 
+                this.quoteLinesCopy = JSON.parse(data);
+                this.error = undefined;
+                console.log('FOUND QUOTELINES');
+                this.isLoading = true; 
+                this.totalRecountCount = this.quoteLinesCopy.length;  
+                this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
+                this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
+                this.endingRecord = this.pageSize;
+            })
+            .catch(error => {
+                this.errorString = JSON.parse(error.body.message); 
+                this.quoteLinesCopy = undefined;
+                console.log('RELOAD PAGE NOT FINDING QUOTELINES'); 
+            });
         }
         else {
+            //add here when there is no quotelines in the quote to set vlaues as empty array!!!!
             this.quoteLinesCopy = JSON.parse(this.quoteLinesApex);
-            console.log('Parameters'+Object.getOwnPropertyNames(this.quoteLinesCopy[0]));
-            console.log('Name '+this.quoteLinesCopy[0].name + ' and Id '+ this.quoteLinesCopy[0].id);
+            //console.log('Parameters'+Object.getOwnPropertyNames(this.quoteLinesCopy[0]));
+            console.log('First QuoteLi: Name '+this.quoteLinesCopy[0].name + ' and Id '+ this.quoteLinesCopy[0].id);
             this.totalRecountCount = this.quoteLinesCopy.length;  
             this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
             this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
@@ -136,9 +147,8 @@ export default class QleDataTable extends LightningElement {
         //TO COMMUNICATE THE CHANGES WITH THE PARENTS (TAB SET + UI + ADD PRODUCT)
         event.preventDefault();
         this.dispatchEvent(new CustomEvent('edition', { detail: this.quoteLinesApex }));
-
         //TO ALERT USER THE CHANGES IN TABLE HAVE BEEN MADE
-        console.log('AQUI SE DEBERIA VER EL CAMBIO '+this.quoteLinesApex);
+        console.log('HERE CHANGES EDITING TABLE '+ this.quoteLinesApex);
         
         const evt = new ShowToastEvent({ title: 'Editing Table Values', message: 'Changes on Table done',
             variant: 'success', mode: 'dismissable' });
@@ -165,6 +175,12 @@ export default class QleDataTable extends LightningElement {
             this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
             this.endingRecord = this.pageSize;
             this.aux2 += 1; 
+
+            this.quoteLinesApex = JSON.stringify(this.quoteLinesCopy); 
+            //TO COMMUNICATE THE CHANGES WITH THE PARENTS (TAB SET + UI + ADD PRODUCT)
+            this.dispatchEvent(new CustomEvent('edition', { detail: this.quoteLinesApex }));
+            //TO ALERT USER THE CHANGES IN TABLE HAVE BEEN MADE
+            console.log('HERE ADDITION FROM LOOK UP SEARCH'+this.quoteLinesApex);
         }
         else if (message.recordData == 'Cloned'){
             this.cloneRows = true; 
@@ -191,6 +207,15 @@ export default class QleDataTable extends LightningElement {
             publish(this.messageContext, QLE_CHANNEL, payload);
             console.log('When Done '+payload.recordData);
         }
+        else if (message.recordData == 'NewOrder'){
+            this.popup = 'New order Came'; 
+            this.quoteLinesApex = message.recordId; 
+            this.quoteLinesCopy = JSON.parse(this.quoteLinesApex);
+            this.totalRecountCount = this.quoteLinesCopy.length; 
+            this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
+            this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
+            this.endingRecord = this.pageSize;
+        }
     }
 
 
@@ -215,6 +240,7 @@ export default class QleDataTable extends LightningElement {
 
     //Click to see Tiers and Delete Row (Not working yet)
     handleRowAction(event) {
+        //CHECK HERE WHEN THERE ARE NO TIERS!!!!!!!!!!
         if (event.detail.action.name === 'More') {
             this.popup ==="Clickeado!" ? this.popup="Desclickeado!" : this.popup="Clickeado!";
             let dataRow = event.detail.row;
@@ -237,18 +263,17 @@ export default class QleDataTable extends LightningElement {
 
         } else if(event.detail.action.name === 'Delete') {
             let dataRow = event.detail.row;
-            
-            this.quoteLinesDeleted = this.quoteLinesCopy; 
-            let row = this.quoteLinesDeleted.findIndex(x => x.id === dataRow.id);
+            let quoteLinesDeleted = this.quoteLinesCopy; 
+            let row = quoteLinesDeleted.findIndex(x => x.id === dataRow.id);
             this.popup = "Eliminado: " + dataRow.name + " Row: " + row;
-            if (this.quoteLinesDeleted.length > 1){
-                this.quoteLinesDeleted.splice(row,1); 
+            if (quoteLinesDeleted.length > 1){
+                quoteLinesDeleted.splice(row,1); 
             }
             else {
-                this.quoteLinesDeleted = []; 
+                quoteLinesDeleted = []; 
             }
             let payload = { 
-                recordId: this.quoteLinesDeleted,
+                recordId: quoteLinesDeleted,
                 recordData: 'Deleting'
             };
             console.log('When Delete ' +payload.recordData);
@@ -306,6 +331,7 @@ export default class QleDataTable extends LightningElement {
         .catch((error) => {
             //console.log(error);
             console.log("THIS ERROR IS THE CONVERTION IN APEX")
+            console.log(error);
             console.log(error.status + " " + error.body.message);
         })
 

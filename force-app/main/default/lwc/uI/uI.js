@@ -9,8 +9,9 @@ export default class UI extends LightningElement {
 
     editTable(event){
         console.log('IS IN THE UI');
-        console.log(Object.getOwnPropertyNames(event));
+        //console.log(Object.getOwnPropertyNames(event));
         this.quoteLinesApex = event.detail; 
         console.log('Totally Legal');
     }
+
 }
