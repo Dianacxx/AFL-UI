@@ -1,9 +1,14 @@
 <template>
     <lightning-card>
-        <lightning-button variant="success" 
-            label="Open UI" title="Open UI" 
-            onclick={handleNavigate}
-            class="slds-align_absolute-center"
-        ></lightning-button>
+        <template if:false={isLoading}>
+            <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+        </template>
+        <template if:true={isLoading}>
+                <lightning-button variant="success" 
+                    label="Open UI" title="Open UI" 
+                    onclick={handleNavigate}
+                    class="slds-align_absolute-center"
+                ></lightning-button>
+        </template>
     </lightning-card>
 </template>

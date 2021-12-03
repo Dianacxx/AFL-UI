@@ -1,5 +1,7 @@
 <template>
-    <template if:false={UI}>
+    <template if:true={text}>
+        <p  style="color:red;">{text}</p>
+    </template>
         <lightning-card >
             <div class="slds-border_top slds-border_right slds-border_bottom slds-border_left slds-m-left_large slds-m-right_large">
                 <c-qle-show-header record-id={recordId}></c-qle-show-header>
@@ -7,15 +9,12 @@
         </lightning-card>
         <lightning-card>
             <div class="slds-border_top slds-border_right slds-border_bottom slds-border_left slds-m-left_large slds-m-right_large">
-                <c-qle-add-product-section record-id={recordId}></c-qle-add-product-section>
+                <c-qle-add-product-section record-id={recordId} quote-lines-apex={quoteLinesApex} onopenproductselection={changePs}></c-qle-add-product-section>
             </div>
             <div class="slds-border_top slds-border_right slds-border_bottom slds-border_left slds-m-left_large slds-m-right_large">
-                <c-qle-tab-set record-id={recordId}></c-qle-tab-set>
+                <c-qle-tab-set record-id={recordId} quote-lines-apex={quoteLinesApex} oneditionparent={editTable}></c-qle-tab-set>
             </div>
         </lightning-card>
-    </template>
-    <template if:true={UI}>
-        <c-ui-product-selection></c-ui-product-selection>
     </template>
     
 </template>

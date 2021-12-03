@@ -12,6 +12,9 @@ const COLUMNS = [
 ];
 
 export default class QleAddProductSection extends NavigationMixin(LightningElement) {
+    //Send string trought LWC to keep data
+    @api quoteLinesApex; 
+
     //To display the total value
     @track totalValueQuote; 
     @track totalValue; 
@@ -109,12 +112,15 @@ export default class QleAddProductSection extends NavigationMixin(LightningEleme
 
     //NAVIGATION TO PRODUCT SELECTION PAGE
     navitageToProductSelection(event) {
+
+        //this.dispatchEvent(new CustomEvent('openproductselection'));
+        //console.log('CAMBIE!'); 
         event.preventDefault();
         let componentDef = {
             componentDef: "c:uiProductSelection",
             attributes: {
                 recordId: this.recordId,
-                quoteLines: this.quoteLinesOrder, //THIS HAS TO CHANGE TO quoteLinesCopy
+                quoteLinesApex: this.quoteLinesApex, //THIS HAS TO CHANGE TO quoteLinesCopy
             }
         };
         // Encode the componentDefinition JS object to Base64 format to make it url addressable

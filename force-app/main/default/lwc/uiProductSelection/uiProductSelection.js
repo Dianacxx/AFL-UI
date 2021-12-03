@@ -9,19 +9,43 @@ import PPQ_CHANNEL from  '@salesforce/messageChannel/Product_Plus_Qle_Comms__c';
 
 export default class UiProductSelection extends NavigationMixin(LightningElement) {
     @api recordId; 
-    @api quoteLines; 
+    @api quoteLinesApex; 
     @api quoteLine1; 
 
     get quoteLine1() {
-        return this.quoteLines.length; //Object.getOwnPropertyNames(this.quoteLines);
+        console.log(this.quoteLinesApex);
+        if (this.quoteLinesApex){ return 'SOMETHING HAS BEEN SENDED'}
+        return 'NOTHING HERE';
+        
     }
 
-    handleSaveExit(){
-        //JUST NAVIGATE
+    handleCancel(){
         var url = window.location.href; 
         var value = url.substr(0,url.lastIndexOf('/') + 1);
         window.history.back();
         return false;
+    }
+
+    handleSaveExit(event){
+        
+        event.preventDefault();
+        let componentDef = {
+            componentDef: "c:uI",
+            attributes: {
+                recordId: this.recordId,
+                quoteLinesApex: this.quoteLinesApex,//CHENGE THIS WITH THE LIST OF QUOTES PLUS THE ADDITION IN PS TO RETURN TO UI 
+                text: 'SAVE AND EXIT FROM PS', 
+            }
+        };
+        // Encode the componentDefinition JS object to Base64 format to make it url addressable
+        let encodedComponentDef = btoa(JSON.stringify(componentDef));
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: '/one/one.app#' + encodedComponentDef
+            }
+        });
+        
     }
 
     @track productTab; 

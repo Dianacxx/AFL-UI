@@ -9,19 +9,13 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { publish, subscribe, MessageContext } from 'lightning/messageService';
 import QLE_CHANNEL from  '@salesforce/messageChannel/Qle_Comms__c';
 import TABLE_CHANNEL from '@salesforce/messageChannel/Table_Comms__c'; 
-import PPQ_CHANNEL from  '@salesforce/messageChannel/Product_Plus_Qle_Comms__c';
+//import PPQ_CHANNEL from  '@salesforce/messageChannel/Product_Plus_Qle_Comms__c';
 
 
 
 const COLUMNS = [
     { label: 'ID', fieldName: 'id'},
     { label: 'Name', fieldName: 'name',editable: true},
-    { type: 'button-icon',initialWidth: 34,typeAttributes:{iconName: 'action:description', name: 'More', variant:'brand'}},
-    { type: 'button-icon',initialWidth: 34,typeAttributes:{iconName: 'action:delete', name: 'Delete', variant:'brand'}}
-];
-const COLUMNS2 = [
-    { label: 'ID 2', fieldName: 'id'},
-    { label: 'Name 2', fieldName: 'name',editable: true},
     { type: 'button-icon',initialWidth: 34,typeAttributes:{iconName: 'action:description', name: 'More', variant:'brand'}},
     { type: 'button-icon',initialWidth: 34,typeAttributes:{iconName: 'action:delete', name: 'Delete', variant:'brand'}}
 ];
@@ -47,9 +41,10 @@ const COLUMNS_CONTRACTS = [
 
 export default class QleDataTable extends LightningElement {
     @api recordId;
+    @api quoteLinesApex; 
     productId; 
     
-    @track columns; 
+    @track columns = COLUMNS; 
     @api columnsTiers = COLUMNS_TIERS;   
     @api columnsContracts = COLUMNS_CONTRACTS; 
     @track isLoading = true; 
@@ -76,7 +71,32 @@ export default class QleDataTable extends LightningElement {
     @track dataPages = []; 
     @track totalPage = 0;
     @track pageSize = 10; 
-    
+
+    connectedCallback() {
+        this.subscribeToMessageChannel();
+
+        //THIS IS GOING TO CHANGE WHEN VALUES RETURNING FROM PS ARE GOOD
+        if (!this.quoteLinesApex){
+            this.quoteLinesCopy = [
+                {id: 123, name: 'Change this value'},
+                {id: 321, name: 'with PD returning values'},
+            ];
+            this.totalRecountCount = this.quoteLinesCopy.length;  
+            this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
+            this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
+            this.endingRecord = this.pageSize;
+        }
+        else {
+            this.quoteLinesCopy = JSON.parse(this.quoteLinesApex);
+            console.log('Parameters'+Object.getOwnPropertyNames(this.quoteLinesCopy[0]));
+            console.log('Name '+this.quoteLinesCopy[0].name + ' and Id '+ this.quoteLinesCopy[0].id);
+            this.totalRecountCount = this.quoteLinesCopy.length;  
+            this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
+            this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
+            this.endingRecord = this.pageSize;
+        }        
+    }
+
     previousHandler() {
         if (this.page > 1) {
             this.page = this.page - 1; //decrease page by 1
@@ -90,21 +110,16 @@ export default class QleDataTable extends LightningElement {
         }             
     }
     displayRecordPerPage(page){
-
         this.startingRecord = ((page -1) * this.pageSize) ;
         this.endingRecord = (this.pageSize * page);
-
         this.endingRecord = (this.endingRecord > this.totalRecountCount) 
                             ? this.totalRecountCount : this.endingRecord; 
-
         this.dataPages = this.quoteLinesCopy.slice(this.startingRecord, this.endingRecord);
-
         this.startingRecord = this.startingRecord + 1;
     }    
 
-
-
     draftValues = [];
+
     //Editing Table
     handleSave(event){
         this.quoteLinesEdit = event.detail.draftValues; 
@@ -116,54 +131,20 @@ export default class QleDataTable extends LightningElement {
             this.quoteLinesCopy[index] = this.quoteLinesEdit[i];
             console.log('New data in qlC '+ this.quoteLinesCopy[index].name); 
         }
-        /*
-        for (let i = 0; i<this.quoteLinesEdit.length; i++){
-            const index = this.quoteLinesCopy.findIndex(x => x.id === this.quoteLinesEdit[i].id);
-            this.quoteLinesCopy[index] =  [...this.quoteLinesEdit[i]]; 
-            const index2 = this.dataPages.findIndex(x => x.id === this.quoteLinesEdit[i].id);
-            this.dataPages[index2] =  [...this.quoteLinesEdit[i]]; 
-        }
+        this.quoteLinesApex = JSON.stringify(this.quoteLinesCopy); 
+
+        //TO COMMUNICATE THE CHANGES WITH THE PARENTS (TAB SET + UI + ADD PRODUCT)
+        event.preventDefault();
+        this.dispatchEvent(new CustomEvent('edition', { detail: this.quoteLinesApex }));
+
+        //TO ALERT USER THE CHANGES IN TABLE HAVE BEEN MADE
+        console.log('AQUI SE DEBERIA VER EL CAMBIO '+this.quoteLinesApex);
         
-        
-        this.totalRecountCount = this.quoteLinesCopy.length;
-        this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
-        this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
-        this.endingRecord = this.pageSize;
-        //Alert user when save the values
-        */
         const evt = new ShowToastEvent({ title: 'Editing Table Values', message: 'Changes on Table done',
             variant: 'success', mode: 'dismissable' });
         this.dispatchEvent(evt);
     }
 
-    //Quotelines data
-    @wire(printQuoteLines, {quoteId: '$recordId'})
-    quoteLinesWire({error, data})
-    {
-        if (data){
-            this.quoteLines = JSON.parse(data);
-            
-            if (!this.copyQL){
-                this.quoteLinesCopy = this.quoteLines;
-                this.totalRecountCount = this.quoteLinesCopy.length;  
-                this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
-                this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
-                this.endingRecord = this.pageSize;
-                this.copyQL = true; 
-            }
-            this.error = undefined;
-            this.isLoading = false; 
-            //To change the columns value
-            if (this.aux === 1){
-                this.columns = COLUMNS; 
-            } else {
-                this.columns = COLUMNS2; 
-            }
-        } else if (error){
-            this.error = JSON.parse(error.body.message); 
-            this.quoteLines = undefined; 
-        }
-    }
     //Add rows to table (ADDING FROM THE SAME LIST, MISSING ADDING FROM LOOK UP FIELD)
     @wire(MessageContext)
     messageContext;
@@ -211,34 +192,8 @@ export default class QleDataTable extends LightningElement {
             console.log('When Done '+payload.recordData);
         }
     }
-    connectedCallback() {
-        this.subscribeToMessageChannel();
-    }
-
-    //CONNECTION WITH PRODUCT UI
-    @wire(MessageContext)
-    messageContext2;
-    subscribeToMessageChannel() {
-        this.subscription2 = subscribe(
-          this.messageContext2,
-          PPQ_CHANNEL,
-          (message2) => this.handleMessage2(message2)
-        );
-    }
-    handleMessage2(message2) {
-        this.popup = message2.booleanCheck; 
-        if (message2.booleanCheck == 'Send Value FILTER to PRODUCT selection'){
-            console.log('COMM FROM PS TO QLE SUCCESS');
-        }
-        if (message2.booleanCheck == 'Send Value PRODUCT selection to QLE'){
-            console.log('COMM FROM PS TO QLE SUCCESS');
-        }
-
-    }
 
 
-
-    
     //ASK IF THIS IS THE METHOD TO ADD THOSE
     //@wire(addQuoteLine,{quoteId: '$recordId', productId: '$productId'})
 

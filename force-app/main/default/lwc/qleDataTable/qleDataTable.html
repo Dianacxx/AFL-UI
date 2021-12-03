@@ -3,7 +3,9 @@
     
     <!--VARIABLE popup HELPS TO SEE ACTIONS HAPPENING-->
     <p class="slds-align_absolute-center" style="background-color:SlateBlue;"><b><lightning-formatted-text value={popup}></lightning-formatted-text></b></p>
+    <!--
     <lightning-spinner if:true={isLoading} alternative-text="Loading" size="medium"></lightning-spinner>
+    -->
     <div>
         <!--PAGINATION-->
         <div class="slds-align_absolute-center">
@@ -12,9 +14,16 @@
             <lightning-button label="Next" icon-name="utility:chevronright" icon-position="right" onclick={nextHandler} class="slds-align_absolute-center slds-var-p-left_medium"></lightning-button>
         </div>    
         <!--DATATABLE-->
+        <template if:true={quoteLinesApex}>
+            <p class="slds-align_absolute-center" style="color:red;">String of quoteLinesApex</p>
+        </template>
         <div class="slds-align_absolute-center">
+            <template if:true={dataPages}>
+                <p class="slds-align_absolute-center" style="color:red;">Objects of dataPages</p>
+            </template> 
             <lightning-datatable key-field="id" draft-values={draftValues} data={dataPages} columns={columns} onrowaction={handleRowAction} onrowselection={getSelectedName} onsave={handleSave}></lightning-datatable>
         </div>
+        
     </div>
      
      <!--Popup starts-->

@@ -141,17 +141,16 @@ public with sharing class QuoteController {
     
     @AuraEnabled(cacheable=true)
     public static String printQuoteInfo(String quoteId) {
-        QuoteReader quoteReader = new QuoteReader();
+       // QuoteReader quoteReader = new QuoteReader();
         // QuoteModel quote = quoteReader.read('a0q5f0000013pc3AAA');
-        QuoteModel quote = quoteReader.read(quoteId);
-        SBQQ__Quote__c quoteInfo = [SELECT SBQQ__ListAmount__c FROM SBQQ__Quote__c WHERE ID=:quoteId];
+        //QuoteModel quote = quoteReader.read(quoteId);
+        SBQQ__Quote__c quoteInfo = [SELECT Name, SBQQ__Status__c, SBQQ__ListAmount__c FROM SBQQ__Quote__c WHERE ID=:quoteId];
 
         QuoteWrapperClass wrapper = new QuoteWrapperClass();
-        wrapper.name = quote.record.name;
-        wrapper.status = quote.record.SBQQ__Status__c;
+        wrapper.name = quoteInfo.Name;
+        wrapper.status = quoteInfo.SBQQ__Status__c;
         wrapper.totalValue = quoteInfo.SBQQ__ListAmount__c;
         
-       System.debug('total '+quote.record.SBQQ__ListAmount__c + ' Status ' + quote.record.SBQQ__Status__c);
        return JSON.serialize(wrapper);
     } 
     @AuraEnabled(cacheable=true)
@@ -255,7 +254,7 @@ public with sharing class QuoteController {
         List<QuoteLineWrapperClass> untypedQuoteLines = (List<QuoteLineWrapperClass>) JSON.deserialize(quoteLines, List<QuoteLineWrapperClass>.class);
         System.debug('QUOTE LINES FROM JSON: ' + untypedQuoteLines);
         //Check all the existig quote lines in salesforce
-        List<SBQQ__QuoteLine__c> existingQuoteLines = [SELECT ID FROM SBQQ__QuoteLine__c];
+        List<SBQQ__QuoteLine__c> existingQuoteLines = [SELECT ID FROM SBQQ__QuoteLine__c WHERE SBQQ__Quote__c =: quoteId];
         Set<Id> quoteLineIDs = new Set<Id>();
 
         //Add the existing quote line ids to a set
@@ -267,19 +266,22 @@ public with sharing class QuoteController {
             //Checks if the quote line already exists in salesforce, if it does, it updates the values.
             if (quoteLineIDs.contains(quoteLineID)) {
                 QuoteLineModel quoteLine = new QuoteLineModel();
+                // for (SBQQ__QuoteLine__c line : existingQuoteLines) {
+                    
+                // }
                 //Looks for the existing quote line with the same ID and inserts it in the quote line model.
-                quoteLine.setRecord([SELECT ID, SBQQ__Quote__c, SBQQ__Product__c FROM SBQQ__QuoteLine__c WHERE ID =: quoteLineID LIMIT 1]);
-                quoteLine.record.SBQQ__Quantity__c = Decimal.valueOf(5);
+                // quoteLine.setRecord(findQuoteLine(String.valueOf(quoteLineID)));
+                // quoteLine.record.SBQQ__Quantity__c = Decimal.valueOf(5);
                 quoteLinesToInsert.add(quoteLine);
             }else {
-                QuoteLineModel quoteLine = new QuoteLineModel();
-                SBQQ__QuoteLine__c newQuoteLine = new SBQQ__QuoteLine__c ();
-                newQuoteLine.id = line.id;
-                newQuoteLine.SBQQ__Quantity__c = Decimal.valueOf(line.quantity);
+                // QuoteLineModel quoteLine = new QuoteLineModel();
+                // SBQQ__QuoteLine__c newQuoteLine = new SBQQ__QuoteLine__c ();
+                // newQuoteLine.id = line.id;
+                // newQuoteLine.SBQQ__Quantity__c = Decimal.valueOf(line.quantity);
 
-                //Inserts the record to the Quote Line model
-                quoteLine.setRecord(newQuoteLine);
-                quoteLinesToInsert.add(quoteLine);
+                // //Inserts the record to the Quote Line model
+                // quoteLine.setRecord(newQuoteLine);
+                // quoteLinesToInsert.add(quoteLine);
             }
         }
         
@@ -326,6 +328,22 @@ public with sharing class QuoteController {
         calculator.calculate(quote, 'MyCallback');
 
         //return quote.netTotal;        
+    }
+
+    public static SBQQ__QuoteLine__c findQuoteLine(String quoteLineId){
+        List<SBQQ__QuoteLine__c> quoteLineList = [SELECT ID, SBQQ__Quote__c, SBQQ__Product__c FROM SBQQ__QuoteLine__c];
+        List<SBQQ__QuoteLine__c> quoteLine = new List<SBQQ__QuoteLine__c>();
+        for (SBQQ__QuoteLine__c line : quoteLineList) {
+            if (line.id == quoteLineId) {
+                quoteLine.add(line);
+            }
+        }
+        if (quoteLine!= null) {
+            return quoteLine[0];
+        }else {
+            System.debug('NOT WORKING');
+            return quoteLine[0];
+        }
     }
 
 }

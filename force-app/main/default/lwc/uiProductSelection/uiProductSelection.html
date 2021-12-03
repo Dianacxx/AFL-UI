@@ -1,6 +1,6 @@
 <template>
-    <template if:true={quoteLines}>
-        <p>FUNCIONA {recordId}</p>
+    <template if:true={quoteLinesApex}>
+        <p>Record Id {recordId}</p>
         <p>{quoteLine1}</p>
     </template>
     
@@ -10,7 +10,10 @@
                 <h2 class="slds-text-heading_large slds-m-left_large  slds-align_absolute-center">Add Products</h2> 
             </div>
             <div class="slds-col slds-size_1-of-2">
+                <div class="slds-align_absolute-center"> 
+                <lightning-button class=" slds-align_absolute-center slds-m-right_x-small" variant="brand" label="Cancel" icon-name="utility:close" onclick={handleCancel}></lightning-button>
                 <lightning-button class=" slds-align_absolute-center" variant="brand" label="Save & Exit" icon-name="utility:save" onclick={handleSaveExit}></lightning-button>
+                </div>
             </div>
         </div>
         <p>{productTab}</p>
