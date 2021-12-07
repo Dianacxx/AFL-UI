@@ -15,18 +15,18 @@
             <div class="slds-col slds-size_1-of-2"> <!-- Button group -->
                     <div class="slds-align_absolute-center"> 
                         <!--PUT FUNCTION HERE TO OPEN POPUP TO REORDER-->
-                        <lightning-button class="slds-m-right_small" variant="brand" label="Reorder Lines" onclick={openModal}></lightning-button>
+                        <lightning-button class="stretchButton slds-m-right_small" variant="brand" label="Reorder Lines" onclick={openModal}></lightning-button>
                         <!--PUT FUNCTION HERE TO SAVE INFROAMTION AND CALCULATE VALUES-->
-                        <lightning-button class="slds-m-right_small" variant="brand-outline" label="Save & Calculate"></lightning-button>
+                        <lightning-button class="stretchButton slds-m-right_small" variant="brand-outline" label="Save & Calculate"></lightning-button>
                         <!--PUT FUNCTION HERE TO SAVE AND NAVIGATE TO RECORD PAGE-->
-                        <lightning-button variant="brand" label="Save & Exit" icon-name="utility:save" onclick={navigateToQuoteRecordPage}></lightning-button>
+                        <lightning-button class="stretchButton" variant="brand" label="Save & Exit" icon-name="utility:save" onclick={navigateToQuoteRecordPage}></lightning-button>
                     </div>
                 <div class="slds-align_absolute-center slds-m-top_small">
                     <br/>
                         <!--PUT FUNCTION HERE TO OPEN PRODUCT SELECTION-->
-                        <lightning-button variant="brand-outline" class="slds-m-right_small" label="Product Selection"  onclick={navitageToProductSelection}></lightning-button>
+                        <lightning-button variant="brand-outline" class="stretchButton slds-m-right_small" label="Product Selection"  onclick={navitageToProductSelection}></lightning-button>
                         <!--PUT FUNCTION HERE TO CLONE SELECTED VALUES-->
-                        <lightning-button variant="brand-outline" label="Clone Selected" onclick={cloneRowsInTable}></lightning-button>
+                        <lightning-button variant="brand-outline" class="stretchButton" label="Clone Selected" onclick={cloneRowsInTable}></lightning-button>
                     <br/>
                     </div>
                 <div class="slds-align_absolute-center slds-m-top_small">

@@ -306,23 +306,28 @@ export default class QleDataTable extends LightningElement {
     //BUTTON TO ACTIVE THE APEX SAVERS. 
     @api sending; 
     
-    handleSend(event){
+    async handleSend(event){
 
         console.log('BUTTON CLICKED');
         this.sending = JSON.stringify(this.quoteLinesCopy);
         this.popup = 'Sending To Apex';
-        
+        var startTime = performance.now();
+        await 
+        /*
         saveQuote({quoteId: this.recordId , quoteLines: this.sending})
-        .then((result) => {
+        .then(() => {
             console.log("Testing with saveQuote: Working Fine");
-            console.log(result);
+            console.log();
         })
         .catch((error) => {
             //console.log(error);
             console.log("saveQuote is not working");
             console.log(error.status + " " + error.body.message);
-        })
-
+        })             
+        var endTime = performance.now();
+        console.log(`Call to saveQuote took ${endTime - startTime} milliseconds`);
+        var startTime = performance.now();
+        */
         saveAndCalculateQuote({quoteId: this.recordId , quoteLines: this.sending})
         .then((result) => {
             console.log("TOTAL value");
@@ -334,7 +339,8 @@ export default class QleDataTable extends LightningElement {
             console.log(error);
             console.log(error.status + " " + error.body.message);
         })
-
+        var endTime = performance.now();
+        console.log(`Call to saveAndCalculateQuote took ${endTime - startTime} milliseconds`);
         console.log('DONE FROM JS');
     }
     

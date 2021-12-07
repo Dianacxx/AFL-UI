@@ -15,8 +15,6 @@ export default class QleShowHeader extends LightningElement {
     quoteDetailWire({error, data}){
         if (data){
             this.quoteDetail = JSON.parse(data);
-            //console.log('Name '+this.quoteDetail.name);
-            //console.log('Total Value '+this.quoteDetail.totalValue);
             this.error = undefined;
             this.isLoadingHeader = false; 
         } else if (error){
