@@ -273,12 +273,12 @@ public with sharing class QuoteController {
                 System.debug('ENTERED');
                 QuoteLineModel newModel = new QuoteLineModel();
                 newModel.setRecord(line);
+                newModel.record.SBQQ__Quantity__c = 10;
                 // newModel.record.SBQQ__Quantity__c = line.SBQQ__Quantity__c;
-                newModel.record.SBQQ__Quantity__c = Decimal.valueOf(5);
-
                 quoteLinesToInsert.add(newModel);
             }            
         }
+      //  quoteLinesToInsert[0].record.SBQQ__Quantity__c = 50;
 
 
         //Inserts the new version of the quote lines into the quote line model
@@ -294,12 +294,13 @@ public with sharing class QuoteController {
         }
         System.debug('new quote '+savedQuote);
         //Calculates the totals of the new version of the quote            
-        Decimal total = QuoteCalculatorMethod(savedQuote);
-        system.debug('NEW TOTAL = ' + total);
+        //Decimal total = QuoteCalculatorMethod(savedQuote);
+        //system.debug('NEW TOTAL = ' + total);
 
         SBQQ__Quote__c quoteInfo = [SELECT SBQQ__ListAmount__c FROM SBQQ__Quote__c WHERE ID =: quoteId LIMIT 1];
+        System.debug('TOTAL ' + quoteInfo.SBQQ__ListAmount__c);
         //Returns the total value
-        //return String.valueOf(quoteInfo.SBQQ__ListAmount__c);
+        // return String.valueOf(quoteInfo.SBQQ__ListAmount__c);
     }
     @AuraEnabled (cacheable = true)
     @Future

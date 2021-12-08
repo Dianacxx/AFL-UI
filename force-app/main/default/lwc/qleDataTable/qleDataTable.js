@@ -74,9 +74,9 @@ export default class QleDataTable extends LightningElement {
 
     connectedCallback() {
         this.subscribeToMessageChannel();
-
+        console.log('RELOADING THE COMP'+this.quoteLinesApex);
         //THIS IS GOING TO CHANGE WHEN VALUES RETURNING FROM PS ARE GOOD
-        if (!this.quoteLinesApex){
+        if (this.quoteLinesApex == '[]'){
             //Quotelines data
             printQuoteLines({quoteId: '$recordId'})
             .then((data) => {
@@ -95,6 +95,10 @@ export default class QleDataTable extends LightningElement {
                 this.quoteLinesCopy = undefined;
                 console.log('RELOAD PAGE NOT FINDING QUOTELINES'); 
             });
+        }
+        else if(this.quoteLinesApex == '[id: \"none\"]'){
+            this.quoteLinesCopy = [];
+            console.log('NONE VALUE IN QUOTE'); 
         }
         else {
             //add here when there is no quotelines in the quote to set vlaues as empty array!!!!
@@ -150,7 +154,7 @@ export default class QleDataTable extends LightningElement {
         //TO ALERT USER THE CHANGES IN TABLE HAVE BEEN MADE
         console.log('HERE CHANGES EDITING TABLE '+ this.quoteLinesApex);
         
-        const evt = new ShowToastEvent({ title: 'Editing Table Values', message: 'Changes on Table done',
+        const evt = new ShowToastEvent({ title: 'Editing Table Values', message: 'Changes Done in Table',
             variant: 'success', mode: 'dismissable' });
         this.dispatchEvent(evt);
     }
@@ -169,13 +173,14 @@ export default class QleDataTable extends LightningElement {
         this.popup = message.recordData; 
         if (message.recordData == 'Checked'){
             this.productId = message.recordId;
+            //here use the addQuoteLine method to trasform the product into quote
             this.quoteLinesCopy = [...this.quoteLinesCopy, {id: message.recordId[this.aux2], name: 'New Addition'}];
             this.totalRecountCount = this.quoteLinesCopy.length; 
             this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
             this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
             this.endingRecord = this.pageSize;
             this.aux2 += 1; 
-
+            
             this.quoteLinesApex = JSON.stringify(this.quoteLinesCopy); 
             //TO COMMUNICATE THE CHANGES WITH THE PARENTS (TAB SET + UI + ADD PRODUCT)
             this.dispatchEvent(new CustomEvent('edition', { detail: this.quoteLinesApex }));
@@ -222,7 +227,8 @@ export default class QleDataTable extends LightningElement {
     //ASK IF THIS IS THE METHOD TO ADD THOSE
     //@wire(addQuoteLine,{quoteId: '$recordId', productId: '$productId'})
 
-    getSelectedName(event){
+    handleRowSelection(event){
+        //AQUI ENVIAR UN MENSAJE EN CANAL PARA ACTIVAR EL BOTON DE CLONAR Y LA INFO PARA CLONAR
         if (this.cloneRows){
             const selectedRows = event.detail.selectedRows;
             for (let i = 0; i < selectedRows.length; i++) {
@@ -305,39 +311,29 @@ export default class QleDataTable extends LightningElement {
 
     //BUTTON TO ACTIVE THE APEX SAVERS. 
     @api sending; 
-    
+    @api spinnerSaving = false; 
     async handleSend(event){
-
         console.log('BUTTON CLICKED');
         this.sending = JSON.stringify(this.quoteLinesCopy);
         this.popup = 'Sending To Apex';
         var startTime = performance.now();
+        this.spinnerSaving = true;
         await 
-        /*
-        saveQuote({quoteId: this.recordId , quoteLines: this.sending})
-        .then(() => {
-            console.log("Testing with saveQuote: Working Fine");
-            console.log();
-        })
-        .catch((error) => {
-            //console.log(error);
-            console.log("saveQuote is not working");
-            console.log(error.status + " " + error.body.message);
-        })             
-        var endTime = performance.now();
-        console.log(`Call to saveQuote took ${endTime - startTime} milliseconds`);
-        var startTime = performance.now();
-        */
         saveAndCalculateQuote({quoteId: this.recordId , quoteLines: this.sending})
         .then((result) => {
             console.log("TOTAL value");
             console.log(result);
+            this.spinnerSaving = false;
+            const evt = new ShowToastEvent({ title: 'Success saving changes', message: 'Changes are saved',
+            variant: 'success', mode: 'dismissable' });
+            this.dispatchEvent(evt);
         })
         .catch((error) => {
             //console.log(error);
             console.log("THIS ERROR IS THE CONVERTION IN APEX")
             console.log(error);
             console.log(error.status + " " + error.body.message);
+            console.log('error.body.stackTrace: '+ error.body.stackTrace);
         })
         var endTime = performance.now();
         console.log(`Call to saveAndCalculateQuote took ${endTime - startTime} milliseconds`);

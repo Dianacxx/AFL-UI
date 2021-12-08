@@ -1,5 +1,4 @@
 import { LightningElement, api, wire, track } from 'lwc';
-//import { getRecord } from 'lightning/uiRecordApi';
 import printQuoteInfo from '@salesforce/apex/QuoteController.printQuoteInfo'; 
 
 
@@ -8,7 +7,6 @@ export default class QleShowHeader extends LightningElement {
     @track quoteDetail;
     @api recordId;
     @track isLoadingHeader = true; 
-    @track totalValue;
 
     //Quote data
     @wire(printQuoteInfo, {quoteId: '$recordId'})

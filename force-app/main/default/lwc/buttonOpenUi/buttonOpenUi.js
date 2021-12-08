@@ -48,10 +48,30 @@ export default class ButtonOpenUi extends NavigationMixin(LightningElement) {
                 }
             });
          }
-        else {
-            const evt = new ShowToastEvent({ title: 'NOT QUOTELINES YET', message: 'CHANGE THIS BEHAVIOR',
+        else if (this.quoteLinesString == '[]'){
+            this.quoteLinesString = '[id: \"none\"]';
+            console.log(this.quoteLinesString);
+
+            const evt = new ShowToastEvent({ title: 'This Quote has no quotelines', message: 'There are no quotelines yet',
             variant: 'warning', mode: 'dismissable' });
             this.dispatchEvent(evt);
+
+            var compDefinition = {
+                componentDef: "c:uI",
+                attributes: {
+                    recordId: this.recordId,
+                    quoteLinesApex:  this.quoteLinesString, 
+                    text: 'Recived'
+                }
+            };
+            // Base64 encode the compDefinition JS object
+            var encodedCompDef = btoa(JSON.stringify(compDefinition));
+            this[NavigationMixin.Navigate]({
+                type: 'standard__webPage',
+                attributes: {
+                    url: '/one/one.app#' + encodedCompDef
+                }
+            });
         }
     }
 }
