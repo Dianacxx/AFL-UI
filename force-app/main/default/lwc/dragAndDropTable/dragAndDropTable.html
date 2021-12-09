@@ -1,0 +1,31 @@
+<template>
+    
+    <div class="slds-grid slds-grid_vertical">
+      <div class="slds-scrollable slds-grow">
+        <div class="slds-scrollable_none">
+          <table aria-multiselectable="true" class=" slds-table slds-no-row-hover
+              slds-table_bordered slds-table_fixed-layout slds-table_resizable-cols " role="grid" >
+            <thead>
+              <tr class="slds-line-height_reset">
+                <th>Id</th>
+                <th>Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template for:each={ElementList} for:item="acc" for:index="index">
+                <tr key={acc.Id} onchange={Change}  draggable="true" ondrop={Drop}
+                  ondragstart={DragStart} ondragover={DragOver} title={index}  >
+                  <td role="gridcell">
+                    <div class="slds-cell-wrap" title={index}>{acc.id}</div>
+                  </td>
+                  <td role="gridcell">
+                    <div class="slds-cell-wrap" title="Phone">{acc.name}</div>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </template>

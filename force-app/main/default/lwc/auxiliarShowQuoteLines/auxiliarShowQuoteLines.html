@@ -1,0 +1,53 @@
+<template> <!--THIS IS THE UI COMPONENT -->
+    <lightning-card>
+            <!--ROWS FOR UI-->
+            <!--Header qle-show-header component-->
+            <div class="slds-align_absolute-center slds-m-left_medium slds-m-right_medium" style="width: 90vw;">
+                <div class="slds-border_top slds-border_right slds-border_bottom slds-border_left slds-m-left_large slds-m-right_large">
+                    <c-qle-show-header record-id={recordId}></c-qle-show-header>
+                </div>
+            </div>
+            <!--Done Header-->
+            <!--Body-->
+            <lightning-layout multiple-rows>
+                <!--Add product section-->
+                <lightning-layout-item size="11" small-device-size="8" padding="around-small">
+                     <div class="slds-grid">
+                        <div class="slds-col">
+                            <lightning-input  class="slds-m-right_small  slds-m-left_small" type="number" name="input6" label="Number field " value="0.5" formatter="percent" step="0.01"></lightning-input>
+                        </div>
+                        <div class="slds-col">
+                            <lightning-combobox class="slds-m-right_small" name={fieldLabel}  label="Discount Type" value={value} placeholder="Select an Option" options={optionsExample} onchange={handleChange}></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-var-m-top_large ">
+                            <lightning-button variant="brand" label="Apply"></lightning-button>
+                        </div>
+                     </div>
+                </lightning-layout-item>
+                <lightning-layout-item size="12" small-device-size="3" padding="around-small">
+                    <div class="slds-align_absolute-center">
+                        <lightning-button-group>
+                            <lightning-button class="stretchButton" variant="brand" label="Reorder Lines"></lightning-button>
+                            <lightning-button class="stretchButton" variant="brand-outline" label="Save & Calculate"></lightning-button>
+                            <lightning-button class="stretchButton" variant="brand" label="Save & Exit"></lightning-button>
+                        </lightning-button-group>
+                    </div>
+                    <div class="slds-align_absolute-center slds-m-top_small">
+                        <lightning-button-group>
+                            <lightning-button class="stretchButton" variant="brand-outline" label="Product Selection"></lightning-button>
+                            <lightning-button class="stretchButton" variant="brand-outline" label="Clone Selected"></lightning-button>
+                        </lightning-button-group>
+                    </div>
+                    <div class="slds-align_absolute-center slds-m-top_small">
+                        <h1 class="slds-text-heading_medium slds-m-center_medium">Quote Total: {totalValue}</h1>
+                    </div>
+                </lightning-layout-item>
+                <!--Done Add product section-->
+
+                <!--Tab Set + Table-->
+
+                <!--Done Tab Set + Table-->
+             </lightning-layout>
+             <!--Done Body-->
+     </lightning-card>
+</template>

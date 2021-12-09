@@ -1,5 +1,8 @@
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
+import { publish, MessageContext } from 'lightning/messageService';
+import QLE_CHANNEL from  '@salesforce/messageChannel/Qle_Comms__c';
+
 
 const SEARCH_DELAY = 300; // Wait 300 ms after user stops typing then, peform search
 
@@ -42,6 +45,10 @@ export default class Lookup extends NavigationMixin(LightningElement) {
     _defaultSearchResults = [];
     _curSelection = [];
     _focusedResultIndex = null;
+
+    //------CHANNEL TO SEND INFORMATION
+    @wire(MessageContext)
+    messageContext;
 
     // PUBLIC FUNCTIONS AND GETTERS/SETTERS
     @api
@@ -187,6 +194,13 @@ export default class Lookup extends NavigationMixin(LightningElement) {
         if (isUserInteraction) {
             const selectedIds = this._curSelection.map((sel) => sel.id);
             this.dispatchEvent(new CustomEvent('selectionchange', { detail: selectedIds }));
+            //SENDING MESSAGE TO CHANNEL
+            const payload = { 
+                recordId: selectedIds,
+                recordData: 'Checked'
+            };
+            publish(this.messageContext, QLE_CHANNEL, payload);
+        
         }
     }
 
@@ -227,6 +241,8 @@ export default class Lookup extends NavigationMixin(LightningElement) {
         }
     }
 
+ 
+
     handleResultClick(event) {
         const recordId = event.currentTarget.dataset.recordid;
 
@@ -239,9 +255,11 @@ export default class Lookup extends NavigationMixin(LightningElement) {
         newSelection.push(selectedItem);
         this._curSelection = newSelection;
 
+         
         // Process selection update
         this.processSelectionUpdate(true);
-    }
+        
+       }
 
     handleComboboxMouseDown(event) {
         const mainButton = 0;

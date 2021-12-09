@@ -1,16 +1,15 @@
 <template>
     <lightning-tabset>
         <lightning-tab label="Quote Home">
-            Table Here. 
-            <c-qle-data-table record-id={recordId}></c-qle-data-table>
-            </lightning-tab>
+            <c-qle-data-table record-id={recordId} quote-lines-apex={quoteLinesApex} onedition={editedTable} onclone={cloneRowTable}></c-qle-data-table>
+        </lightning-tab>
         <lightning-tab label="Detail View">
-            Wait!
-            <!--<c-account-list></c-account-list>
-            -->
-            </lightning-tab>
+            <p style="color:red;"> MISSING CHANGE INFORMATION (APEX METHOD MODIFICATION OF DETAILS HERE) </p> 
+            <c-qle-data-table record-id={recordId} quote-lines-apex={quoteLinesApex} onedition={editedTable} onclone={cloneRowTable}></c-qle-data-table>
+        </lightning-tab>
         <lightning-tab label="Product Notes">
-            Nothing Yet!
+            <p style="color:red;"> MISSING CHANGE INFORMATION (APEX METHOD MODIFICATION OF DETAILS HERE) </p> 
+            <c-qle-data-table record-id={recordId} quote-lines-apex={quoteLinesApex} onedition={editedTable} onclone={cloneRowTable}></c-qle-data-table>
         </lightning-tab>
     </lightning-tabset>
     <c-sample-lookup-container></c-sample-lookup-container>
