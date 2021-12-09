@@ -153,8 +153,23 @@ public with sharing class QuoteController {
         
        return JSON.serialize(wrapper);
     } 
+    
     @AuraEnabled(cacheable=true)
-    public static List<QuoteLineWrapperClass> addQuoteLine(String quoteId, String productId) {
+    public static String printQuoteInfo(String quoteId) {
+       // QuoteReader quoteReader = new QuoteReader();
+        // QuoteModel quote = quoteReader.read('a0q5f0000013pc3AAA');
+        //QuoteModel quote = quoteReader.read(quoteId);
+        SBQQ__Quote__c quoteInfo = [SELECT Name, SBQQ__Status__c, SBQQ__ListAmount__c FROM SBQQ__Quote__c WHERE ID=:quoteId LIMIT 1];
+
+        QuoteWrapperClass wrapper = new QuoteWrapperClass();
+        wrapper.name = quoteInfo.Name;
+        wrapper.status = quoteInfo.SBQQ__Status__c;
+        wrapper.totalValue = quoteInfo.SBQQ__ListAmount__c;
+        
+       return JSON.serialize(wrapper);
+    } 
+    @AuraEnabled(cacheable=true)
+    public static void addQuoteLine(String quoteId, String productId) {
         QuoteReader quoteReader = new QuoteReader();
         // QuoteModel quote = quoteReader.read('a0q5f0000013pc3AAA');
         List<QuoteLineWrapperClass> linesToPrint = new List<QuoteLineWrapperClass>();

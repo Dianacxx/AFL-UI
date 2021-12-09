@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
+    <masterLabel>TableComms</masterLabel>
+    <isExposed>true</isExposed>
+    <description>This is the Table of Lightning Message Channel.</description>
+    <lightningMessageFields>
+        <fieldName>dataTable</fieldName>
+        <description>This is the data table that changed</description>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>check</fieldName>
+        <description>checked changes</description>
+    </lightningMessageFields>
+</LightningMessageChannel>
