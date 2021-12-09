@@ -104,7 +104,7 @@ export default class QleDataTable extends LightningElement {
             //add here when there is no quotelines in the quote to set vlaues as empty array!!!!
             this.quoteLinesCopy = JSON.parse(this.quoteLinesApex);
             //console.log('Parameters'+Object.getOwnPropertyNames(this.quoteLinesCopy[0]));
-            console.log('First QuoteLi: Name '+this.quoteLinesCopy[0].name + ' and Id '+ this.quoteLinesCopy[0].id);
+            console.log('First QuoteLine: Name '+this.quoteLinesCopy[0].name + ' and Id '+ this.quoteLinesCopy[0].id);
             this.totalRecountCount = this.quoteLinesCopy.length;  
             this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
             this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
@@ -185,10 +185,22 @@ export default class QleDataTable extends LightningElement {
             //TO COMMUNICATE THE CHANGES WITH THE PARENTS (TAB SET + UI + ADD PRODUCT)
             this.dispatchEvent(new CustomEvent('edition', { detail: this.quoteLinesApex }));
             //TO ALERT USER THE CHANGES IN TABLE HAVE BEEN MADE
-            console.log('HERE ADDITION FROM LOOK UP SEARCH'+this.quoteLinesApex);
+            console.log('HERE ADDITION FROM LOOK UP SEARCH');
         }
-        else if (message.recordData == 'Cloned'){
-            this.cloneRows = true; 
+        else if (message.recordData == 'CloneClicked'){
+            //this.cloneRows = true; 
+            console.log('FROM TABLE: Cloning Rows');
+            for (let i = 0; i < this.selectedRows.length; i++) {
+                this.quoteLinesCopy = [...this.quoteLinesCopy, this.selectedRows[i]];
+            }
+            this.quoteLinesApex = JSON.stringify(this.quoteLinesCopy); 
+            this.totalRecountCount = this.quoteLinesCopy.length; 
+            this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize);
+            this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
+            this.endingRecord = this.pageSize;
+            this.dispatchEvent(new CustomEvent('clonedvalues', { detail: this.quoteLinesApex }));
+            //TO ALERT USER THE CHANGES IN TABLE HAVE BEEN MADE
+            console.log('HERE CLONED');
         }
         else if (message.recordData == 'Reorder'){
             this.popup = 'Reorder'; 
@@ -201,6 +213,7 @@ export default class QleDataTable extends LightningElement {
         else if (message.recordData == 'Deleting'){
             this.popup = 'Deleting'; 
             this.quoteLinesCopy = message.recordId;
+            this.quoteLinesApex = JSON.stringify(this.quoteLinesCopy); 
             this.totalRecountCount = this.quoteLinesCopy.length; 
             this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
             this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
@@ -227,21 +240,14 @@ export default class QleDataTable extends LightningElement {
     //ASK IF THIS IS THE METHOD TO ADD THOSE
     //@wire(addQuoteLine,{quoteId: '$recordId', productId: '$productId'})
 
+    @track selectedRows; 
     handleRowSelection(event){
         //AQUI ENVIAR UN MENSAJE EN CANAL PARA ACTIVAR EL BOTON DE CLONAR Y LA INFO PARA CLONAR
-        if (this.cloneRows){
-            const selectedRows = event.detail.selectedRows;
-            for (let i = 0; i < selectedRows.length; i++) {
-                //alert('You selected: ' + selectedRows[i].name);
-                this.quoteLinesCopy = [...this.quoteLinesCopy, selectedRows[i]];
-                 
-            }
-            this.totalRecountCount = this.quoteLinesCopy.length; 
-            this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize);
-            this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
-            this.endingRecord = this.pageSize;
-            this.cloneRows = false;
-        }
+        this.dispatchEvent(new CustomEvent('clone'));//, { detail: this.quoteLinesApex }));
+        //TO ALERT USER THE CHANGES IN TABLE HAVE BEEN MADE
+        //console.log('ROW: '+Object.getOwnPropertyNames(event));
+        console.log('At least one row selected '+ event.detail.selectedRows.length);
+        this.selectedRows = event.detail.selectedRows;
     }
 
     //Click to see Tiers and Delete Row (Not working yet)
@@ -278,12 +284,21 @@ export default class QleDataTable extends LightningElement {
             else {
                 quoteLinesDeleted = []; 
             }
+            this.quoteLinesCopy = quoteLinesDeleted;
+            this.quoteLinesApex = JSON.stringify(this.quoteLinesCopy); 
+            this.totalRecountCount = this.quoteLinesCopy.length;  
+            this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
+            this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
+            this.endingRecord = this.pageSize;
+            console.log('DELETING, NOW:'+this.quoteLinesCopy.lenght);
+            this.dispatchEvent(new CustomEvent('deletedvalues', { detail: this.quoteLinesApex }));
+            /*
             let payload = { 
                 recordId: quoteLinesDeleted,
                 recordData: 'Deleting'
             };
             console.log('When Delete ' +payload.recordData);
-            publish(this.messageContext, QLE_CHANNEL, payload);
+            publish(this.messageContext, QLE_CHANNEL, payload);*/
             
         }
     }
@@ -294,7 +309,6 @@ export default class QleDataTable extends LightningElement {
     closeModalAction(){
         this.modalContainer=false;
     }
-
     //Table information in Tiers and Contracts
     clickedButtonLabel = true;
     handleClick1(event) {
@@ -302,8 +316,7 @@ export default class QleDataTable extends LightningElement {
     }
     handleClick2(event) {
         this.clickedButtonLabel = false;
-    }
-    
+    }   
     handleResize(event) {
         const sizes = event.detail.columnWidths;
     }

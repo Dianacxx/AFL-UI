@@ -154,9 +154,10 @@ public with sharing class QuoteController {
        return JSON.serialize(wrapper);
     } 
     @AuraEnabled(cacheable=true)
-    public static void addQuoteLine(String quoteId, String productId) {
+    public static List<QuoteLineWrapperClass> addQuoteLine(String quoteId, String productId) {
         QuoteReader quoteReader = new QuoteReader();
         // QuoteModel quote = quoteReader.read('a0q5f0000013pc3AAA');
+        List<QuoteLineWrapperClass> linesToPrint = new List<QuoteLineWrapperClass>();
         QuoteModel quote = quoteReader.read(quoteId);
         ProductReader productReader = new ProductReader();
         Pricebook2 prodPriceBook = [SELECT Id FROM Pricebook2 WHERE Id IN (SELECT SBQQ__PriceBook__c FROM SBQQ__Quote__c WHERE Id =: quoteId) LIMIT 1];
@@ -167,7 +168,16 @@ public with sharing class QuoteController {
         productModels.add(product);
         ProductAdder adder = new ProductAdder(); 
         QuoteModel quoteWithProducts = adder.add(quote, productModels, 0);
-        System.debug('quote lines Number ' + quoteWithProducts.getLineItems().size());
+        System.debug('ADDER quote lines Number ' + quoteWithProducts.getLineItems().size());
+
+        for (Integer i = 0 ; i<quoteWithProducts.getLineItems().size(); i++) {
+            QuoteLineWrapperClass wrapper = new QuoteLineWrapperClass();
+            wrapper.id = quoteWithProducts.getLineItems()[i].record.id;
+            wrapper.product = quoteWithProducts.getLineItems()[i].record.SBQQ__Product__c;
+            linesToPrint.add(wrapper);
+        }
+
+        return linesToPrint;
         // QuoteSaver saver = new QuoteSaver();
         // QuoteModel savedQuote = saver.save(quoteWithProducts);
         // System.debug(savedQuote); retornar el quote line
@@ -249,56 +259,83 @@ public with sharing class QuoteController {
     @Future
     public static void saveAndCalculateQuote(String quoteId, String quoteLines){
         QuoteReader quoteReader = new QuoteReader();
-        QuoteModel quote = quoteReader.read(quoteId);
+            QuoteModel quote = quoteReader.read(quoteId);
 
-        List<QuoteLineModel> quoteLinesToInsert = new List<QuoteLineModel>();
-        //Gets the quote lines and deserialize it into a quote line wrapper
-        List<QuoteLineWrapperClass> untypedQuoteLines = (List<QuoteLineWrapperClass>) JSON.deserialize(quoteLines, List<QuoteLineWrapperClass>.class);
-        System.debug('size ' + untypedQuoteLines.size() + 'QUOTE LINES FROM JSON: ' + untypedQuoteLines);
-        //Check all the existig quote lines in salesforce
-        List<SBQQ__QuoteLine__c> existingQuoteLines = [SELECT ID, SBQQ__Product__r.SBQQ__PricingGuidance__c, SBQQ__AdditionalDiscount__c,SBQQ__Discount__c,SBQQ__AdditionalDiscountAmount__c,SBQQ__AdditionalQuantity__c,SBQQ__AllowAssetRefund__c,SBQQ__BatchQuantity__c,SBQQ__BillingFrequency__c,SBQQ__BillingType__c,SBQQ__BlockPrice__c,SBQQ__Bundled__c,SBQQ__CarryoverLine__c,SBQQ__ChargeType__c,SBQQ__ComponentCost__c,SBQQ__ComponentDiscountedByPackage__c,SBQQ__ComponentListTotal__c,SBQQ__ComponentTotal__c,SBQQ__ComponentSubscriptionScope__c,SBQQ__ComponentUpliftedByPackage__c,SBQQ__ComponentVisibility__c,SBQQ__CompoundDiscountRate__c,SBQQ__ConfigurationRequired__c,SBQQ__ContractedPrice__c,SBQQ__Cost__c,SBQQ__CostEditable__c,SBQQ__CustomerTotal__c,SBQQ__CustomerPrice__c,SBQQ__DefaultSubscriptionTerm__c,SBQQ__Description__c,SBQQ__DiscountSchedule__c,SBQQ__DiscountScheduleType__c,SBQQ__DiscountTier__c,SBQQ__DistributorDiscount__c,SBQQ__DynamicOptionId__c,SBQQ__EarliestValidAmendmentStartDate__c,SBQQ__EffectiveEndDate__c,SBQQ__EffectiveQuantity__c,SBQQ__EffectiveStartDate__c,SBQQ__EffectiveSubscriptionTerm__c,SBQQ__EndDate__c,SBQQ__Existing__c,SBQQ__Favorite__c,SBQQ__GenerateContractedPrice__c,SBQQ__GrossProfit__c,SBQQ__Group__c,SBQQ__Guidance__c,SBQQ__HasConsumptionSchedule__c,SBQQ__Hidden__c,SBQQ__Incomplete__c,Name,SBQQ__ListTotal__c,SBQQ__ListPrice__c,SBQQ__Markup__c,SBQQ__MarkupRate__c,SBQQ__MarkupAmount__c,SBQQ__MaximumPrice__c,SBQQ__MinimumPrice__c,SBQQ__NetTotal__c,SBQQ__NetPrice__c,SBQQ__NonDiscountable__c,SBQQ__NonPartnerDiscountable__c,SBQQ__Number__c,SBQQ__OptionDiscount__c,SBQQ__OptionDiscountAmount__c,SBQQ__OptionLevel__c,SBQQ__OptionType__c,SBQQ__Optional__c,SBQQ__OriginalPrice__c,Original_Price_Formula__c,SBQQ__BundledQuantity__c,SBQQ__OriginalQuoteLineId__c,SBQQ__OriginalUnitCost__c,SBQQ__Bundle__c,SBQQ__PackageCost__c,SBQQ__PackageListTotal__c,SBQQ__PackageProductCode__c,SBQQ__PackageProductDescription__c,SBQQ__PackageTotal__c,SBQQ__PartnerDiscount__c,SBQQ__PartnerTotal__c,SBQQ__PartnerPrice__c,SBQQ__SubscriptionPercent__c,SBQQ__SubscriptionBase__c,SBQQ__SubscriptionCategory__c,SBQQ__SubscriptionScope__c,SBQQ__SubscriptionTargetPrice__c,SBQQ__PreviousSegmentPrice__c,SBQQ__PreviousSegmentUplift__c,SBQQ__Dimension__c,SBQQ__PriceEditable__c,SBQQ__PricebookEntryId__c,SBQQ__PricingMethod__c,SBQQ__PricingMethodEditable__c,SBQQ__PriorQuantity__c,SBQQ__Product__c,SBQQ__ProductCode__c,SBQQ__ProductFamily__c,SBQQ__ProductName__c,SBQQ__ProductOption__c,SBQQ__ProductSubscriptionType__c,SBQQ__ProrateMultiplier__c,SBQQ__ProratedListPrice__c,SBQQ__ProratedPrice__c,SBQQ__Quantity__c,SBQQ__Quote__c,SBQQ__RegularTotal__c,SBQQ__RegularPrice__c,SBQQ__Renewal__c,SBQQ__RenewedAsset__c,SBQQ__RenewedSubscription__c,SBQQ__RequiredBy__c,SBQQ__SegmentIndex__c,SBQQ__SegmentKey__c,SBQQ__SegmentLabel__c,SBQQ__Source__c,SBQQ__SpecialPrice__c,Special_Price_Formula__c,SBQQ__SpecialPriceDescription__c,SBQQ__SpecialPriceType__c,SBQQ__StartDate__c,SBQQ__SubscribedAssetIds__c,SBQQ__SubscriptionPricing__c,SBQQ__SubscriptionTerm__c,SBQQ__SubscriptionType__c,SBQQ__TaxCode__c,SBQQ__Taxable__c,SBQQ__TermDiscount__c,SBQQ__TermDiscountSchedule__c,SBQQ__TermDiscountTier__c,SBQQ__TotalDiscountRate__c	,SBQQ__TotalDiscountAmount__c,SBQQ__UnitCost__c,SBQQ__UnproratedNetPrice__c,SBQQ__UpgradedAsset__c,SBQQ__UpgradedQuantity__c,SBQQ__UpgradedSubscription__c,SBQQ__Uplift__c,SBQQ__UpliftAmount__c,SBQQ__VolumeDiscount__c FROM SBQQ__QuoteLine__c WHERE SBQQ__Quote__c =: quoteId];
-        Set<Id> quoteLineIDs = new Set<Id>();
-        List<QuoteLineModel> quoteLineModelList = new List<QuoteLineModel>();
-        Set<Id> receivedIDs = new Set<Id>();
+            List<QuoteLineModel> quoteLinesToInsert = new List<QuoteLineModel>();
+            //Gets the quote lines and deserialize it into a quote line wrapper
+            List<QuoteLineWrapperClass> untypedQuoteLines = (List<QuoteLineWrapperClass>) JSON.deserialize(quoteLines, List<QuoteLineWrapperClass>.class);
+            // List<QuoteLineModel> untypedQuoteLines = (List<QuoteLineModel>) JSON.deserialize(quoteLines, List<QuoteLineModel>.class);
+            System.debug('size ' + untypedQuoteLines.size() + 'QUOTE LINES FROM JSON: ' + untypedQuoteLines);
+            //Check all the existig quote lines in salesforce
+            List<SBQQ__QuoteLine__c> existingQuoteLines = [SELECT ID, SBQQ__Product__r.SBQQ__PricingGuidance__c, SBQQ__AdditionalDiscount__c,SBQQ__Discount__c,SBQQ__AdditionalDiscountAmount__c,SBQQ__AdditionalQuantity__c,SBQQ__AllowAssetRefund__c,SBQQ__BatchQuantity__c,SBQQ__BillingFrequency__c,SBQQ__BillingType__c,SBQQ__BlockPrice__c,SBQQ__Bundled__c,SBQQ__CarryoverLine__c,SBQQ__ChargeType__c,SBQQ__ComponentCost__c,SBQQ__ComponentDiscountedByPackage__c,SBQQ__ComponentListTotal__c,SBQQ__ComponentTotal__c,SBQQ__ComponentSubscriptionScope__c,SBQQ__ComponentUpliftedByPackage__c,SBQQ__ComponentVisibility__c,SBQQ__CompoundDiscountRate__c,SBQQ__ConfigurationRequired__c,SBQQ__ContractedPrice__c,SBQQ__Cost__c,SBQQ__CostEditable__c,SBQQ__CustomerTotal__c,SBQQ__CustomerPrice__c,SBQQ__DefaultSubscriptionTerm__c,SBQQ__Description__c,SBQQ__DiscountSchedule__c,SBQQ__DiscountScheduleType__c,SBQQ__DiscountTier__c,SBQQ__DistributorDiscount__c,SBQQ__DynamicOptionId__c,SBQQ__EarliestValidAmendmentStartDate__c,SBQQ__EffectiveEndDate__c,SBQQ__EffectiveQuantity__c,SBQQ__EffectiveStartDate__c,SBQQ__EffectiveSubscriptionTerm__c,SBQQ__EndDate__c,SBQQ__Existing__c,SBQQ__Favorite__c,SBQQ__GenerateContractedPrice__c,SBQQ__GrossProfit__c,SBQQ__Group__c,SBQQ__Guidance__c,SBQQ__HasConsumptionSchedule__c,SBQQ__Hidden__c,SBQQ__Incomplete__c,Name,SBQQ__ListTotal__c,SBQQ__ListPrice__c,SBQQ__Markup__c,SBQQ__MarkupRate__c,SBQQ__MarkupAmount__c,SBQQ__MaximumPrice__c,SBQQ__MinimumPrice__c,SBQQ__NetTotal__c,SBQQ__NetPrice__c,SBQQ__NonDiscountable__c,SBQQ__NonPartnerDiscountable__c,SBQQ__Number__c,SBQQ__OptionDiscount__c,SBQQ__OptionDiscountAmount__c,SBQQ__OptionLevel__c,SBQQ__OptionType__c,SBQQ__Optional__c,SBQQ__OriginalPrice__c,Original_Price_Formula__c,SBQQ__BundledQuantity__c,SBQQ__OriginalQuoteLineId__c,SBQQ__OriginalUnitCost__c,SBQQ__Bundle__c,SBQQ__PackageCost__c,SBQQ__PackageListTotal__c,SBQQ__PackageProductCode__c,SBQQ__PackageProductDescription__c,SBQQ__PackageTotal__c,SBQQ__PartnerDiscount__c,SBQQ__PartnerTotal__c,SBQQ__PartnerPrice__c,SBQQ__SubscriptionPercent__c,SBQQ__SubscriptionBase__c,SBQQ__SubscriptionCategory__c,SBQQ__SubscriptionScope__c,SBQQ__SubscriptionTargetPrice__c,SBQQ__PreviousSegmentPrice__c,SBQQ__PreviousSegmentUplift__c,SBQQ__Dimension__c,SBQQ__PriceEditable__c,SBQQ__PricebookEntryId__c,SBQQ__PricingMethod__c,SBQQ__PricingMethodEditable__c,SBQQ__PriorQuantity__c,SBQQ__Product__c,SBQQ__ProductCode__c,SBQQ__ProductFamily__c,SBQQ__ProductName__c,SBQQ__ProductOption__c,SBQQ__ProductSubscriptionType__c,SBQQ__ProrateMultiplier__c,SBQQ__ProratedListPrice__c,SBQQ__ProratedPrice__c,SBQQ__Quantity__c,SBQQ__Quote__c,SBQQ__RegularTotal__c,SBQQ__RegularPrice__c,SBQQ__Renewal__c,SBQQ__RenewedAsset__c,SBQQ__RenewedSubscription__c,SBQQ__RequiredBy__c,SBQQ__SegmentIndex__c,SBQQ__SegmentKey__c,SBQQ__SegmentLabel__c,SBQQ__Source__c,SBQQ__SpecialPrice__c,Special_Price_Formula__c,SBQQ__SpecialPriceDescription__c,SBQQ__SpecialPriceType__c,SBQQ__StartDate__c,SBQQ__SubscribedAssetIds__c,SBQQ__SubscriptionPricing__c,SBQQ__SubscriptionTerm__c,SBQQ__SubscriptionType__c,SBQQ__TaxCode__c,SBQQ__Taxable__c,SBQQ__TermDiscount__c,SBQQ__TermDiscountSchedule__c,SBQQ__TermDiscountTier__c,SBQQ__TotalDiscountRate__c	,SBQQ__TotalDiscountAmount__c,SBQQ__UnitCost__c,SBQQ__UnproratedNetPrice__c,SBQQ__UpgradedAsset__c,SBQQ__UpgradedQuantity__c,SBQQ__UpgradedSubscription__c,SBQQ__Uplift__c,SBQQ__UpliftAmount__c,SBQQ__VolumeDiscount__c FROM SBQQ__QuoteLine__c WHERE SBQQ__Quote__c =: quoteId];
+            Set<Id> quoteLineIDs = new Set<Id>();
+            Set<Id> receivedIDs = new Set<Id>();
 
-        //Add the existing quote line ids to a set
-        for (SBQQ__QuoteLine__c line : existingQuoteLines) {
-            quoteLineIDs.add(line.id);
-        }
-        for (QuoteLineWrapperClass line : untypedQuoteLines) {
-            receivedIDs.add(line.id);
-        }
-        for (SBQQ__QuoteLine__c line : existingQuoteLines) {
-            if (receivedIDs.contains(line.id)) {
-                System.debug('ENTERED');
-                QuoteLineModel newModel = new QuoteLineModel();
-                newModel.setRecord(line);
-                newModel.record.SBQQ__Quantity__c = 10;
-                // newModel.record.SBQQ__Quantity__c = line.SBQQ__Quantity__c;
-                quoteLinesToInsert.add(newModel);
-            }            
-        }
-      //  quoteLinesToInsert[0].record.SBQQ__Quantity__c = 50;
+            //Trying to add new object
+            List<QuoteLineWrapperClass> newQuoteLineList = addQuoteLine(quoteId, '01t5f000001yHX1AAM');
+            SBQQ__QuoteLine__c lineToAdd = new SBQQ__QuoteLine__c();
+            
+            System.debug('new list size: ' + newQuoteLineList.size());
+
+            //Add the existing quote line ids to a set
+            for (SBQQ__QuoteLine__c line : existingQuoteLines) {
+                quoteLineIDs.add(line.id);
+            }
+            for (QuoteLineWrapperClass line : untypedQuoteLines) {
+                receivedIDs.add(line.id);
+            }
+        try{
+
+            
+            for (SBQQ__QuoteLine__c line : existingQuoteLines) {
+                if (receivedIDs.contains(line.id)) {
+                    System.debug('Entered first');
+                    QuoteLineModel newModel = new QuoteLineModel();
+
+                    newModel.setRecord(line);
+                    newModel.setParentItemKey(Integer.valueOf(line.SBQQ__Product__r.id));
+                    newModel.setKey(Integer.valueOf(line.id));
+                    //newModel.record.SBQQ__Quantity__c = 10;
+                    quoteLinesToInsert.add(newModel);
+                } 
+            }
+            for ( QuoteLineWrapperClass line : untypedQuoteLines) {
+                if (!quoteLineIDs.contains(line.id)) {
+                    System.debug('Entered second');
+                    SBQQ__QuoteLine__c newQuoteLine = new SBQQ__QuoteLine__c(id = line.id);
+                    newQuoteLine.SBQQ__Product__c = line.product;
+                    newQuoteLine.SBQQ__Quantity__c = Decimal.valueOf(line.quantity);
+
+                    QuoteLineModel newModel = new QuoteLineModel();
+                    newModel.setRecord(newQuoteLine);
+                    quoteLinesToInsert.add(newModel);
+                }
+            }
+            //  quoteLinesToInsert[0].record.SBQQ__Quantity__c = 50;
 
 
-        //Inserts the new version of the quote lines into the quote line model
-        quote.setLineItems(quoteLinesToInsert);
-        System.debug(' size : ' +quoteLinesToInsert.size() + 'New Line Items : ' + quoteLinesToInsert );
-       
+            //Inserts the new version of the quote lines into the quote line model
+            quote.setLineItems(quoteLinesToInsert);
+            //System.debug('line items size : ' +quoteLinesToInsert.size() + 'New Line Items : ' + quoteLinesToInsert );
         
+            
 
-        //Saves te new version of the quote
-        QuoteModel savedQuote = quoteSaverMethod(quote);
-        for (QuoteLineModel line : savedQuote.getLineItems()) {
-            System.debug( 'quantity ' +  line.record.SBQQ__Quantity__c);
+            //Saves te new version of the quote
+            QuoteModel savedQuote = quoteSaverMethod(quote);
+            System.debug('line items size :' +  savedQuote.getLineItems().size());
+            // for (QuoteLineModel line : savedQuote.getLineItems()) {
+            //     System.debug( 'new quote lines quantity: ' +  line.record.SBQQ__Quantity__c);
+            // }
+            System.debug('new quote '+savedQuote);
+
+            //Queries for the new total 
+            SBQQ__Quote__c quoteInfo = [SELECT SBQQ__ListAmount__c FROM SBQQ__Quote__c WHERE ID =: quoteId LIMIT 1];
+            System.debug('TOTAL ' + quoteInfo.SBQQ__ListAmount__c);
         }
-        System.debug('new quote '+savedQuote);
-        //Calculates the totals of the new version of the quote            
-        //Decimal total = QuoteCalculatorMethod(savedQuote);
-        //system.debug('NEW TOTAL = ' + total);
-
-        SBQQ__Quote__c quoteInfo = [SELECT SBQQ__ListAmount__c FROM SBQQ__Quote__c WHERE ID =: quoteId LIMIT 1];
-        System.debug('TOTAL ' + quoteInfo.SBQQ__ListAmount__c);
+        catch (Exception e) {
+            throw new AuraHandledException('Something went wrong: ' + e.getMessage() + 'cause: ' + e.getCause());
+        }
+        
         //Returns the total value
         // return String.valueOf(quoteInfo.SBQQ__ListAmount__c);
     }

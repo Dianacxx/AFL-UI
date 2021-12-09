@@ -11,9 +11,11 @@ export default class ButtonOpenUi extends NavigationMixin(LightningElement) {
     @api isLoading = false; 
 
     //Quotelines data
+    
     @wire(printQuoteLines, {quoteId: '$recordId'})
     quoteLinesWire({error, data})
     {
+        var startTime = performance.now();
         if (data){
             this.quoteLinesString = data;//JSON.parse(data);
             this.error = undefined;
@@ -25,8 +27,10 @@ export default class ButtonOpenUi extends NavigationMixin(LightningElement) {
             this.quoteLinesString = undefined;
             console.log('QuoteLines ERROR in string'); 
         }
+        var endTime = performance.now();
+        console.log(`Call to quoteLinesWire took ${endTime - startTime} milliseconds`);
     }
-
+    
 
      handleNavigate() {
          

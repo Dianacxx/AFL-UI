@@ -42,7 +42,7 @@
                </div>
                <div class="slds-align_absolute-center slds-m-top_small">
                        <lightning-button class="stretchButton slds-m-right_small" variant="brand-outline" label="Product Selection" onclick={navitageToProductSelection}></lightning-button>
-                       <lightning-button class="stretchButton" variant="brand-outline" label="Clone Selected" disabled></lightning-button>
+                       <lightning-button class="stretchButton" variant="brand-outline" label="Clone Selected" disabled={disableButton} onclick={handleClone}></lightning-button>
                </div>
                <div class="slds-align_absolute-center slds-m-top_small">
                    <h1 class="slds-text-heading_medium slds-m-center_medium">Quote Total: <lightning-formatted-number value={totalValue} format-style="currency" currency-code="USD"></lightning-formatted-number></h1>
@@ -51,13 +51,15 @@
         </lightning-layout>
         <!--ADD PRODUCT SELECTION END-->
         <!--DELETE THIS HERE ONCE EVERYTHING IS GOOD-->
+        <!--
         <div class="slds-border_top slds-border_right slds-border_bottom slds-border_left slds-m-left_large slds-m-right_large">
             <c-qle-add-product-section record-id={recordId} quote-lines-apex={quoteLinesApex} onopenproductselection={changePs}></c-qle-add-product-section>
         </div>
+        -->
         <!--TAB SET + TABLE-->
         <!--COMPONENT USED: qleTabSet-->
         <div class="slds-border_top slds-border_right slds-border_bottom slds-border_left slds-m-left_large slds-m-right_large">
-            <c-qle-tab-set record-id={recordId} quote-lines-apex={quoteLinesApex} oneditionparent={editTable}></c-qle-tab-set>
+            <c-qle-tab-set record-id={recordId} quote-lines-apex={quoteLinesApex} oneditionparent={editTable} oncloneparent={cloneTable} onclonedvaluesparent={clonedValues} ondeletevaluesparent={deletedValues}></c-qle-tab-set>
         </div> 
         <!--TAB SET + TABLE END-->
         
@@ -76,7 +78,7 @@
                     </header>
                     <!-- Modal/Popup Box LWC body starts here -->
                     <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                        <p style="color:red;"><b>MISSING THE NEW ORDER TO SHOW IN THE CENTRAL TABLE !!!!!</b></p>
+                        <p style="color:red;"><b>MISSING CHANGES FROM CLONING HERE WHEN CLONED!!!!!</b></p>
                         <p style="color:red;"><b>QuoteLines Size = {longitud}</b></p>
                         <!--START TABLE TO REORDER -->
                         <div class="slds-grid slds-grid_vertical">

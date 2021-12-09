@@ -21,9 +21,8 @@ export default class UI extends NavigationMixin(LightningElement) {
     @track ElementList; 
     @api longitud; 
     @track PopUpReorder =''; 
+    @track disableButtonMessage = true; 
 
-
-   
 
     connectedCallback(){
         //this.subscribeToMessageChannel();
@@ -34,8 +33,8 @@ export default class UI extends NavigationMixin(LightningElement) {
             console.log('NONE VALUE IN QUOTE'); 
 
         } else {
-            console.log(this.quoteLinesApex);
-            console.log(JSON.parse(this.quoteLinesApex));
+            //console.log(this.quoteLinesApex);
+            //console.log(JSON.parse(this.quoteLinesApex));
             this.quoteLinesObj = JSON.parse(this.quoteLinesApex);
         }
        
@@ -43,16 +42,49 @@ export default class UI extends NavigationMixin(LightningElement) {
        this.longitud = this.ElementList.length; 
     }
 
-    //message when edited the table FROM CLIND TO PARENT
+    //CONNECT editTable, clonedValues and deleteValues in one function 
+    //UPDATE VALUES WHEN TABLE EDIT TO BE CLONED
     editTable(event){
         console.log('IS IN THE UI');
         //console.log(Object.getOwnPropertyNames(event));
         this.quoteLinesApex = event.detail; 
         this.quoteLinesObj = JSON.parse(this.quoteLinesApex);
         this.ElementList = this.quoteLinesObj;
+        this.longitud = this.ElementList.length; 
         console.log('Totally Legal');
     }
-
+    //CLONE BUTTON ACTIVATION
+    cloneTable(event){
+        console.log('Active Clone Button in UI');
+        this.disableButtonMessage = false;
+    }
+    //UPDATE QUOTELINES CLONED TO BE PUBLIC
+    clonedValues(event){
+        console.log('VALUES CLONED UI');
+        console.log('Details'+ event.detail);
+        this.quoteLinesApex = event.detail; 
+        this.quoteLinesObj = JSON.parse(this.quoteLinesApex);
+        this.ElementList = this.quoteLinesObj;
+        this.longitud = this.ElementList.length; 
+    }
+    //UPDATE QUOTELINES DELETED TO BE PUBLIC
+    deletedValues(event){
+        console.log('VALUES WITHOUT DELETED UI');
+        console.log('Details'+ event.detail);
+        this.quoteLinesApex = event.detail; 
+        this.quoteLinesObj = JSON.parse(this.quoteLinesApex);
+        this.ElementList = this.quoteLinesObj;
+        this.longitud = this.ElementList.length; 
+    }
+    //CLONE ROWS SELECTED
+    handleClone(){
+        console.log('Clone button clicked');
+        let payload = { 
+            recordId: null,
+            recordData: 'CloneClicked'
+        };
+        publish(this.messageContext, QLE_CHANNEL, payload);
+    }
     //EXAMPLE TO DISPLAY VALUES IN COMBOBOX OF DISCCOUNT 
     get optionsExample() {
         return [
@@ -63,7 +95,8 @@ export default class UI extends NavigationMixin(LightningElement) {
             { label: 'Discount 5', value: 'Discount5' },
         ];
     }
-    //SEE THIS IS NOT WORKING TO MANAGE CHANGES
+    //DO NOT WORK WHEN PARENT CHILD
+    
     @wire(MessageContext)
     messageContext;
     subscribeToMessageChannel() {
@@ -73,10 +106,16 @@ export default class UI extends NavigationMixin(LightningElement) {
           (message) => this.handleMessage(message)
         );
     }
+    /*
     handleMessage(message) {
         console.log('Channel Movement');
         console.log('Data '+message.recordData);
         console.log('Id '+message.recordId);
+    }*/
+
+    //TO ACTIVE BUTTON WHEN CLICKED
+    get disableButton(){
+        return this.disableButtonMessage; 
     }
 
     //QUOTE TOTAL VALUE INFORMATION
@@ -136,9 +175,10 @@ export default class UI extends NavigationMixin(LightningElement) {
     }
 
     submitDetails() {
-        // to close modal set isModalOpen tarck value as false
-        //Add your code to call apex method or do some processing
         this.quoteLinesApex = JSON.stringify(this.ElementList);
+        this.quoteLinesObj = JSON.parse(this.quoteLinesApex);
+        this.isModalOpen = false;
+        console.log('Accepting changes');
         //TO COMMUNICATE THE CHANGES WITH THE PARENTS (TAB SET + UI + ADD PRODUCT)
         const payload = { 
             recordId: this.quoteLinesApex,
@@ -146,7 +186,7 @@ export default class UI extends NavigationMixin(LightningElement) {
         };
         publish(this.messageContext, QLE_CHANNEL, payload);
         console.log('HERE REORDERED TABLE '+ this.quoteLinesApex);
-        this.isModalOpen = false;
+        
     }
      
     //---DRAG SITUATION ---------------
