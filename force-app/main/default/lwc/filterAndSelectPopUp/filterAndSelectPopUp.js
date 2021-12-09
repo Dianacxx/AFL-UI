@@ -33,11 +33,10 @@ export default class FilterAndSelectPopUp extends LightningElement {
              console.log('ADDING AND REVIEWING');
             const payload = { 
                 dataInformation: this.textValue,
-                booleanCheck: 'Send Value FILTER to PRODUCT selection'
+                booleanCheck: 'Send Value PS to QLE'
             };
             publish(this.messageContext, PPQ_CHANNEL, payload);
             this.tabOption = true; 
-            console.log(payload);
             //more here....
         }
     }
@@ -59,11 +58,6 @@ export default class FilterAndSelectPopUp extends LightningElement {
         this.dispatchEvent(new CustomEvent('close'));
         this.tabOption = false; 
         //more here....
-        const payload = { 
-            dataInformation: this.textValue,
-            booleanCheck: 'Send Value PRODUCT selection to QLE'
-        };
-        publish(this.messageContext, PPQ_CHANNEL, payload);
     }
 
     //To test - sending value in input

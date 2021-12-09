@@ -153,6 +153,7 @@ public with sharing class QuoteController {
         
        return JSON.serialize(wrapper);
     } 
+    
     @AuraEnabled(cacheable=true)
     public static List<QuoteLineWrapperClass> addQuoteLine(String quoteId, String productId) {
         QuoteReader quoteReader = new QuoteReader();
@@ -281,7 +282,7 @@ public with sharing class QuoteController {
             for (SBQQ__QuoteLine__c line : existingQuoteLines) {
                 quoteLineIDs.add(line.id);
             }
-            for (QuoteLineWrapperClass line : untypedQuoteLines) {
+            for (QuoteLineWrapperClass line : newQuoteLineList) {
                 receivedIDs.add(line.id);
             }
         try{
@@ -293,30 +294,45 @@ public with sharing class QuoteController {
                     QuoteLineModel newModel = new QuoteLineModel();
 
                     newModel.setRecord(line);
-                    newModel.setParentItemKey(Integer.valueOf(line.SBQQ__Product__r.id));
-                    newModel.setKey(Integer.valueOf(line.id));
+                    // newModel.setParentItemKey(Integer.valueOf(line.SBQQ__Product__r.id));
+                    // newModel.setKey(Integer.valueOf(line.id));
                     //newModel.record.SBQQ__Quantity__c = 10;
                     quoteLinesToInsert.add(newModel);
                 } 
             }
-            for ( QuoteLineWrapperClass line : untypedQuoteLines) {
-                if (!quoteLineIDs.contains(line.id)) {
-                    System.debug('Entered second');
+            for ( QuoteLineWrapperClass line : newQuoteLineList) {
+                if (quoteLineIDs.contains(line.id) == false) {
+                    System.debug('Entered second'); 
                     SBQQ__QuoteLine__c newQuoteLine = new SBQQ__QuoteLine__c(id = line.id);
                     newQuoteLine.SBQQ__Product__c = line.product;
-                    newQuoteLine.SBQQ__Quantity__c = Decimal.valueOf(line.quantity);
+                    newQuoteLine.SBQQ__Quantity__c = 10;
+                    // newQuoteLine.SBQQ__ListPrice__c = Decimal.valueOf(line.listPrice);
+                    // newQuoteLine.SBQQ__Discount__c = Decimal.valueOf(line.discount);
+                    // newQuoteLine.SBQQ__AdditionalDiscountAmount__c = Decimal.valueOf(line.additionalDiscountAmount);
+                    // newQuoteLine.SBQQ__AdditionalQuantity__c = Decimal.valueOf(line.additionalQuantity);
+                    // newQuoteLine.SBQQ__AllowAssetRefund__c = Boolean.valueOf(line.allowAssetRefound);
+                    // newQuoteLine.SBQQ__BatchQuantity__c = Decimal.valueOf(line.batchQuantity);
+                    // newQuoteLine.SBQQ__BillingFrequency__c = line.billingFrequency;
+                    // newQuoteLine.SBQQ__BillingType__c = line.billingType;
+                    // newQuoteLine.SBQQ__Bundled__c = Boolean.valueOf(line.bundled);
+                    // newQuoteLine.SBQQ__ComponentCost__c = Decimal.valueOf(line.componentCost);
+                    // newQuoteLine.SBQQ__ComponentSubscriptionScope__c = line.componentSubscription;
+                    // newQuoteLine.SBQQ__CompoundDiscountRate__c = Decimal.valueOf(line.compoundDiscountRate);
+                    // newQuoteLine.SBQQ__ConfigurationRequired__c = Boolean.valueOf(line.configurationRequired);
+                    
+                    
+                    
 
                     QuoteLineModel newModel = new QuoteLineModel();
                     newModel.setRecord(newQuoteLine);
                     quoteLinesToInsert.add(newModel);
                 }
             }
-            //  quoteLinesToInsert[0].record.SBQQ__Quantity__c = 50;
 
 
             //Inserts the new version of the quote lines into the quote line model
             quote.setLineItems(quoteLinesToInsert);
-            //System.debug('line items size : ' +quoteLinesToInsert.size() + 'New Line Items : ' + quoteLinesToInsert );
+            System.debug('Setter line items: ' +  quote.getLineItems());
         
             
 
@@ -327,9 +343,10 @@ public with sharing class QuoteController {
             //     System.debug( 'new quote lines quantity: ' +  line.record.SBQQ__Quantity__c);
             // }
             System.debug('new quote '+savedQuote);
+            Id savedQuoteId = savedQuote.record.id;
 
             //Queries for the new total 
-            SBQQ__Quote__c quoteInfo = [SELECT SBQQ__ListAmount__c FROM SBQQ__Quote__c WHERE ID =: quoteId LIMIT 1];
+            SBQQ__Quote__c quoteInfo = [SELECT SBQQ__ListAmount__c FROM SBQQ__Quote__c WHERE ID =: savedQuoteId LIMIT 1];
             System.debug('TOTAL ' + quoteInfo.SBQQ__ListAmount__c);
         }
         catch (Exception e) {

@@ -23,7 +23,6 @@ export default class UI extends NavigationMixin(LightningElement) {
     @track PopUpReorder =''; 
     @track disableButtonMessage = true; 
 
-
     connectedCallback(){
         //this.subscribeToMessageChannel();
 
@@ -114,6 +113,10 @@ export default class UI extends NavigationMixin(LightningElement) {
     }*/
 
     //TO ACTIVE BUTTON WHEN CLICKED
+    get disableButton(){
+        return this.disableButtonMessage; 
+    }
+
     get disableButton(){
         return this.disableButtonMessage; 
     }

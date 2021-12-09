@@ -17,7 +17,7 @@ export default class AuxiliarShowQuoteLines extends NavigationMixin(LightningEle
     @api accId; //Account Id associated to the quote
     @api account; //Account Information
     @track isLoadingHeader = false; //Spinner Loading
-    @api totalValue; //Quote Total
+    @api totalValue; //Quote Total Value
 
 
     //Do this in UI
