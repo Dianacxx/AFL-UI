@@ -12,8 +12,8 @@
         </div>
         <!--HEADER END-->
         <!--BODY START-->
-        <lightning-layout multiple-rows class="slds-border_top slds-border_right slds-border_bottom slds-border_left slds-m-left_large slds-m-right_large">
-        <!--ADD PRODUCT SELECTION-->
+         <!--ADD PRODUCT SELECTION-->
+        <lightning-layout multiple-rows class="slds-border_top slds-border_right slds-border_bottom slds-border_left slds-m-left_large slds-m-right_large"> 
             <!--Title and Discount fields-->
             <lightning-layout-item size="12" small-device-size="8" padding="around-small">
               <span class="slds-page-header__title slds-truncate">
@@ -23,13 +23,13 @@
             <lightning-layout-item size="9" small-device-size="6" padding="around-small">
                 <div class="slds-grid">
                    <div class="slds-col slds-m-right_medium">
-                       <lightning-input  class="slds-m-left_medium" type="number" label="Number field " value="0.5" formatter="percent" step="0.01"></lightning-input>
+                       <lightning-input  class="slds-m-left_medium" type="number" label="Number field" placeholder="50%" value={porcentageDiscount} onchange={handlePorcentageDiscount}></lightning-input>
                    </div>
                    <div class="slds-col">
-                       <lightning-combobox name={fieldLabel}  label="Discount Type" value={value} placeholder="Select an Option" options={optionsExample} onchange={handleChange}></lightning-combobox>
+                       <lightning-combobox name={fieldLabel}  label="Discount Type" value={typeDiscount} placeholder="Select an Option" options={optionsExample} onchange={handleTypeDiscount}></lightning-combobox>
                    </div>
                    <div class="slds-col slds-var-m-top_large ">
-                       <lightning-button class="stretchButton slds-m-left_small" variant="brand" label="Apply"></lightning-button>
+                       <lightning-button class="stretchButton slds-m-left_small" variant="brand" label="Apply" onclick={handleApplyDiscount}></lightning-button>
                    </div>
                 </div>
             </lightning-layout-item>
@@ -62,7 +62,6 @@
             <c-qle-tab-set record-id={recordId} quote-lines-apex={quoteLinesApex} oneditionparent={editTable} oncloneparent={cloneTable} onclonedvaluesparent={clonedValues} ondeletevaluesparent={deletedValues}></c-qle-tab-set>
         </div> 
         <!--TAB SET + TABLE END-->
-        
         <!--POP UP REORDER LINES START-->
         <template if:true={isModalOpen}>
             <!-- Modal/Popup Box LWC starts here -->
@@ -78,8 +77,7 @@
                     </header>
                     <!-- Modal/Popup Box LWC body starts here -->
                     <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                        <p style="color:red;"><b>MISSING CHANGES FROM CLONING HERE WHEN CLONED!!!!!</b></p>
-                        <p style="color:red;"><b>QuoteLines Size = {longitud}</b></p>
+                        <p style="color:blue;"><b>QuoteLines Size = {longitud}</b></p>
                         <!--START TABLE TO REORDER -->
                         <div class="slds-grid slds-grid_vertical">
                           <div class="slds-scrollable slds-grow">

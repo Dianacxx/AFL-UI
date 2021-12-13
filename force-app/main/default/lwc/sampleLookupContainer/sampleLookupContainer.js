@@ -91,18 +91,18 @@ export default class SampleLookupContainer extends LightningElement {
         this.maxSelectionSize = event.target.value;
     }
 
+    /*
     handleSubmit() {
         this.checkForErrors();
         if (this.errors.length === 0) {
             this.notifyUser('Success', 'The form was submitted.', 'success');
-            
         }
     }
 
     handleClear() {
         this.initialSelection = [];
         this.errors = [];
-    }
+    }*/
 
     checkForErrors() {
         this.errors = [];

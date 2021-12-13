@@ -1,31 +1,40 @@
 <template>
+
+    <!--BUTTON TO TRY TO SEND TO APEX, SAVE AND RETURN VALUES-->
     <lightning-button variant="success"  label="Sending Array of quote lines" title="Sending QL" onclick={handleSend} class="slds-align_absolute-center"> </lightning-button>
-    
+ 
     <!--VARIABLE popup HELPS TO SEE ACTIONS HAPPENING-->
     <p class="slds-align_absolute-center" style="background-color:SlateBlue;"><b><lightning-formatted-text value={popup}></lightning-formatted-text></b></p>
     <lightning-spinner if:true={spinnerSaving} alternative-text="Loading" size="medium"></lightning-spinner>
+    <!--PAGINATION-->
     <div>
-        <!--PAGINATION-->
-        <div class="slds-align_absolute-center">
-            <lightning-button label="Previous" icon-name="utility:chevronleft" onclick={previousHandler} class=" slds-align_absolute-center slds-var-p-right_medium"></lightning-button>
-            <p class="slds-align_absolute-center"><b> Page {page} of {totalPage}</b></p>
-            <lightning-button label="Next" icon-name="utility:chevronright" icon-position="right" onclick={nextHandler} class="slds-align_absolute-center slds-var-p-left_medium"></lightning-button>
-        </div>    
-        <!--AUXILIAR TO SEE COMMUNICATION BETWEEN COMPONENTS-->
-        <template if:true={quoteLinesApex}>
-            <p class="slds-align_absolute-center" style="color:red;">String of quoteLinesApex</p>
-            <template if:true={dataPages}>
-                <p class="slds-align_absolute-center" style="color:red;">Objects of dataPages</p>
-            </template> 
-        </template>
-        <!--DATATABLE-->
-        <div class="slds-align_absolute-center">
-            <lightning-datatable key-field="id" draft-values={draftValues} data={dataPages} columns={columns} onrowaction={handleRowAction} onrowselection={handleRowSelection} onsave={handleSave}></lightning-datatable>
-        </div>
-        
+        <p class="slds-align_absolute-center"><b> Quotelines: {quotelinesLength}</b></p>
+        <p class="slds-align_absolute-center"><b> Page {page} of {totalPage}</b></p>
+        <lightning-button-group class="slds-align_absolute-center">
+            <lightning-button label="First" icon-name="utility:chevronleft" onclick={firstHandler} class="stretchButton"></lightning-button>
+            <lightning-button label="Previous" icon-name="utility:chevronleft" onclick={previousHandler} class="stretchButton"></lightning-button>
+            <lightning-button label="Next" icon-name="utility:chevronright" icon-position="right" onclick={nextHandler} class="stretchButton"></lightning-button>
+            <lightning-button label="Last" icon-name="utility:chevronright" icon-position="right" onclick={lastHandler} class="stretchButton"></lightning-button>
+        </lightning-button-group>
     </div>
+    <!--PAGINATION END-->
+    <!--AUXILIAR TO SEE COMMUNICATION BETWEEN COMPONENTS-->
+    <template if:true={quoteLinesApex}>
+        <p class="slds-align_absolute-center" style="color:red;">String of quoteLinesApex</p>
+        <template if:true={dataPages}>
+            <p class="slds-align_absolute-center" style="color:red;">Objects of dataPages</p>
+        </template> 
+    </template>
+    <!--DATATABLE-->
+    <div class="slds-align_absolute-center">
+        <lightning-datatable style="width:100%;" key-field="id" draft-values={draftValues} data={dataPages} columns={columns} 
+        onrowaction={handleRowAction} onrowselection={handleRowSelection} onsave={handleSave}
+        sorted-by={sortBy} sorted-direction={sortDirection} onsort={handleSortData}></lightning-datatable>
+    </div>
+    <!--DATATABLE END-->
+        
      
-     <!--Popup starts-->
+    <!--Popup starts-->
     <template if:true={modalContainer}>
         <section  class="slds-modal slds-fade-in-open">
             <div class="slds-modal__container">

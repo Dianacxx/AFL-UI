@@ -2,6 +2,8 @@ import { LightningElement, wire, api, track } from 'lwc';
 import printQuoteLines from '@salesforce/apex/QuoteController.printQuoteLines'; 
 //import addQuoteLine from '@salesforce/apex/QuoteController.addQuoteLine'; 
 import saveAndCalculateQuote from '@salesforce/apex/QuoteController.saveAndCalculateQuote';
+import addQuoteLine from '@salesforce/apex/QuoteController.addQuoteLine';
+
 import saveQuote from '@salesforce/apex/QuoteController.saveQuote';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
@@ -14,8 +16,8 @@ import TABLE_CHANNEL from '@salesforce/messageChannel/Table_Comms__c';
 
 
 const COLUMNS = [
-    { label: 'ID', fieldName: 'id'},
-    { label: 'Name', fieldName: 'name',editable: true},
+    { label: 'ID', fieldName: 'id', sortable: true},
+    { label: 'Name', fieldName: 'name',editable: true, sortable: true},
     { type: 'button-icon',initialWidth: 34,typeAttributes:{iconName: 'action:description', name: 'More', variant:'brand'}},
     { type: 'button-icon',initialWidth: 34,typeAttributes:{iconName: 'action:delete', name: 'Delete', variant:'brand'}}
 ];
@@ -72,6 +74,27 @@ export default class QleDataTable extends LightningElement {
     @track totalPage = 0;
     @track pageSize = 10; 
 
+    //Sort Columns
+    handleSortData(event) {       
+        this.sortBy = event.detail.fieldName;       
+        this.sortDirection = event.detail.sortDirection;       
+        this.sortData(event.detail.fieldName, event.detail.sortDirection);
+    }
+
+    sortData(fieldname, direction) {
+        let parseData = JSON.parse(JSON.stringify(this.dataPages));
+        let keyValue = (a) => {
+            return a[fieldname];
+        };
+       let isReverse = direction === 'asc' ? 1: -1;
+           parseData.sort((x, y) => {
+            x = keyValue(x) ? keyValue(x) : ''; 
+            y = keyValue(y) ? keyValue(y) : '';
+            return isReverse * ((x > y) - (y > x));
+        });
+        this.dataPages = parseData;
+    }
+
     connectedCallback() {
         this.subscribeToMessageChannel();
         console.log('RELOADING THE COMP'+this.quoteLinesApex);
@@ -124,6 +147,15 @@ export default class QleDataTable extends LightningElement {
             this.displayRecordPerPage(this.page);            
         }             
     }
+    firstHandler() {
+        this.page = 1; //turn to page 1
+        this.displayRecordPerPage(this.page);                   
+    }
+    lastHandler() {
+        this.page = this.totalPage; //turn to last page 
+        this.displayRecordPerPage(this.page);                   
+    }
+
     displayRecordPerPage(page){
         this.startingRecord = ((page -1) * this.pageSize) ;
         this.endingRecord = (this.pageSize * page);
@@ -133,9 +165,12 @@ export default class QleDataTable extends LightningElement {
         this.startingRecord = this.startingRecord + 1;
     }    
 
-    draftValues = [];
+    get quotelinesLength(){
+        return this.quoteLinesCopy.length;
+    }
 
     //Editing Table
+    draftValues = [];
     handleSave(event){
         this.quoteLinesEdit = event.detail.draftValues; 
         this.popup = "Table Changed"; 
@@ -172,26 +207,65 @@ export default class QleDataTable extends LightningElement {
     handleMessage(message) {
         this.popup = message.recordData; 
         if (message.recordData == 'Checked'){
+            this.spinnerSaving = true; 
             this.productId = message.recordId;
-            //here use the addQuoteLine method to trasform the product into quote
-            this.quoteLinesCopy = [...this.quoteLinesCopy, {id: message.recordId[this.aux2], name: 'New Addition'}];
-            this.totalRecountCount = this.quoteLinesCopy.length; 
-            this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
-            this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
-            this.endingRecord = this.pageSize;
-            this.aux2 += 1; 
-            
-            this.quoteLinesApex = JSON.stringify(this.quoteLinesCopy); 
-            //TO COMMUNICATE THE CHANGES WITH THE PARENTS (TAB SET + UI + ADD PRODUCT)
-            this.dispatchEvent(new CustomEvent('edition', { detail: this.quoteLinesApex }));
-            //TO ALERT USER THE CHANGES IN TABLE HAVE BEEN MADE
-            console.log('HERE ADDITION FROM LOOK UP SEARCH');
+            console.log('Product ID (List) '+this.productId);
+            let productIdString = message.recordId[this.aux2];
+            let productValue;
+            let quoteList;  
+            let randomId; 
+            //console.log('Product ID String '+productIdString);
+            console.log('length before '+this.quoteLinesCopy.length); 
+            addQuoteLine({quoteId: this.recordId , productId: productIdString})// this.productId[this.aux2]})
+            .then((data)=>{
+                console.log('addQuoteLine DATA');
+                quoteList = JSON.parse(data);
+                //console.log('Quotelines length: '+quoteList.length);
+                //console.log('Quotelines properties : '+Object.getOwnPropertyNames(quoteList[0]));
+                if (quoteList.length > 1){
+                    console.log('Bundle list: '+quoteList.length); 
+                }
+                for (let j = 0; j <quoteList.length; j++){
+                    productValue = quoteList[j];
+                    console.log('Product/Feature Name: '+productValue.product); 
+                    //TO GENERATE RANDOM ID
+                    randomId = Math.random().toString(36).replace(/[^a-z]+/g, '').substring(0, 5);
+                    //TO DELETE SPACES FROM NAME TO GET THE ID
+                    productValue.product = productValue.product.replace(/\s+/g, '');
+                    productValue.id = productValue.product.concat(randomId); 
+                    productValue.name = productValue.product;
+                    console.log('New QuoteLine ID random: '+productValue.id);
+                    this.quoteLinesCopy = [...this.quoteLinesCopy, productValue];
+                }
+                console.log('Length after '+this.quoteLinesCopy.length); 
+                this.totalRecountCount = this.quoteLinesCopy.length; 
+                this.totalPage = Math.ceil(this.totalRecountCount / this.pageSize); 
+                this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
+                this.endingRecord = this.pageSize;
+                this.aux2 += 1;     
+                this.quoteLinesApex = JSON.stringify(this.quoteLinesCopy); 
+                //TO COMMUNICATE THE CHANGES WITH THE PARENTS (TAB SET + UI + ADD PRODUCT)
+                this.dispatchEvent(new CustomEvent('edition', { detail: this.quoteLinesApex }));
+                //TO ALERT USER THE CHANGES IN TABLE HAVE BEEN MADE
+                console.log('HERE ADDITION FROM LOOK UP SEARCH');
+                this.spinnerSaving = false;
+            })
+            .catch((error)=>{
+                console.log('addQuoteLine ERROR');
+                console.log(error);
+            })
         }
         else if (message.recordData == 'CloneClicked'){
-            //this.cloneRows = true; 
+            let clonedRows = this.selectedRows;
             console.log('FROM TABLE: Cloning Rows');
-            for (let i = 0; i < this.selectedRows.length; i++) {
-                this.quoteLinesCopy = [...this.quoteLinesCopy, this.selectedRows[i]];
+            for (let i = 0; i < clonedRows.length; i++) {
+                let randomId = Math.random().toString(36).replace(/[^a-z]+/g, '').substring(0, 5);
+                console.log('first Id no random -> '+this.quoteLinesCopy[0].id);
+                clonedRows[i].id = clonedRows[i].id.concat(randomId); 
+                console.log('first Id random -> '+this.quoteLinesCopy[0].id);
+                this.quoteLinesCopy = [...this.quoteLinesCopy, clonedRows[i]];
+                console.log('first Id -> '+this.quoteLinesCopy[0].id);
+                console.log('second Id -> '+this.quoteLinesCopy[1].id);
             }
             this.quoteLinesApex = JSON.stringify(this.quoteLinesCopy); 
             this.totalRecountCount = this.quoteLinesCopy.length; 
@@ -234,18 +308,14 @@ export default class QleDataTable extends LightningElement {
             this.dataPages = this.quoteLinesCopy.slice(0,this.pageSize); 
             this.endingRecord = this.pageSize;
         }
+
+        //console.log('----QUOTE APEX STRING -------'+this.quoteLinesApex);
     }
-
-
-    //ASK IF THIS IS THE METHOD TO ADD THOSE
-    //@wire(addQuoteLine,{quoteId: '$recordId', productId: '$productId'})
 
     @track selectedRows; 
     handleRowSelection(event){
-        //AQUI ENVIAR UN MENSAJE EN CANAL PARA ACTIVAR EL BOTON DE CLONAR Y LA INFO PARA CLONAR
-        this.dispatchEvent(new CustomEvent('clone'));//, { detail: this.quoteLinesApex }));
-        //TO ALERT USER THE CHANGES IN TABLE HAVE BEEN MADE
-        //console.log('ROW: '+Object.getOwnPropertyNames(event));
+        //TO ALERT THAT A ROW HAS BEEN SELECTED
+        this.dispatchEvent(new CustomEvent('clone'));
         console.log('At least one row selected '+ event.detail.selectedRows.length);
         this.selectedRows = event.detail.selectedRows;
     }
@@ -333,9 +403,8 @@ export default class QleDataTable extends LightningElement {
         this.spinnerSaving = true;
         await 
         saveAndCalculateQuote({quoteId: this.recordId , quoteLines: this.sending})
-        .then((result) => {
-            console.log("TOTAL value");
-            console.log(result);
+        .then(() => {
+            console.log("Save Done");
             this.spinnerSaving = false;
             const evt = new ShowToastEvent({ title: 'Success saving changes', message: 'Changes are saved',
             variant: 'success', mode: 'dismissable' });
@@ -347,6 +416,9 @@ export default class QleDataTable extends LightningElement {
             console.log(error);
             console.log(error.status + " " + error.body.message);
             console.log('error.body.stackTrace: '+ error.body.stackTrace);
+            const evt = new ShowToastEvent({ title: 'Error Saving Quotelines', message: 'Changes are not saved',
+            variant: 'error', mode: 'dismissable' });
+            this.dispatchEvent(evt);
         })
         var endTime = performance.now();
         console.log(`Call to saveAndCalculateQuote took ${endTime - startTime} milliseconds`);

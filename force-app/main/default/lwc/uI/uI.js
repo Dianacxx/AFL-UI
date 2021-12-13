@@ -4,6 +4,9 @@ import { NavigationMixin } from 'lightning/navigation';
 import { publish, subscribe, MessageContext } from 'lightning/messageService';
 import QLE_CHANNEL from  '@salesforce/messageChannel/Qle_Comms__c';
 
+import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
+import NETAMOUNT_FIELD from '@salesforce/schema/SBQQ__Quote__c.SBQQ__NetAmount__c';
+
 export default class UI extends NavigationMixin(LightningElement) {
     @api recordId;
     @api quoteLinesApex; 
@@ -14,7 +17,7 @@ export default class UI extends NavigationMixin(LightningElement) {
     @track quoteLinesObj; 
     //To show Quote Line total information
     @api quoteDetail; 
-    @api totalValue; 
+    @track totalValue; 
 
     //THE POP-UP TABLE + DRAG AND DROP ACTION
     @track dragStart;
@@ -39,6 +42,38 @@ export default class UI extends NavigationMixin(LightningElement) {
        
        this.ElementList = this.quoteLinesObj;
        this.longitud = this.ElementList.length; 
+    }
+
+    //GET TOTAL QUOTE INFORMATION
+    @wire(getRecord, { recordId: '$recordId', fields: [NETAMOUNT_FIELD]})
+    quoteData({error, data}){
+        if (data){
+            this.quote = data;
+            this.error = undefined;
+            this.totalValue = getFieldValue(this.quote,NETAMOUNT_FIELD);
+            console.log('Total value '+this.totalvalue );
+        } else if (error) {
+            this.quote = undefined;
+            this.error = error;
+            const evt = new ShowToastEvent({ title: 'The total is making changes', message: 'Save and Wait',
+            variant: 'error', mode: 'dismissable' });
+            this.dispatchEvent(evt);
+        } 
+    }
+
+    //APPLY BUTTON WITH DISCOUNT VALUES
+    @track porcentageDiscount;
+    @track typeDiscount; 
+    handlePorcentageDiscount(event) {
+        this.porcentageDiscount = event.detail.value;
+    }
+    handleTypeDiscount(event) {
+        this.typeDiscount = event.detail.value;
+    }
+    handleApplyDiscount(){
+        alert('Yo have selected the porcentageDiscount ' + this.porcentageDiscount);
+        alert('Yo have selected the typeDiscount ' + this.typeDiscount);
+
     }
 
     //CONNECT editTable, clonedValues and deleteValues in one function 
@@ -121,6 +156,7 @@ export default class UI extends NavigationMixin(LightningElement) {
         return this.disableButtonMessage; 
     }
 
+    /*
     //QUOTE TOTAL VALUE INFORMATION
     @wire(printQuoteInfo, {quoteId: '$recordId'})
     quoteDetailWire({error, data}){
@@ -134,6 +170,7 @@ export default class UI extends NavigationMixin(LightningElement) {
             this.quoteDetail = undefined; 
         }
     }
+    */
 
     //NAVIGATE TO QUOTE RECORD PAGE (MISSING SAVING INFORMATION)
     navigateToQuoteRecordPage() {

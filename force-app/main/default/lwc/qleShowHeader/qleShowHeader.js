@@ -47,11 +47,10 @@ export default class QleShowHeader extends LightningElement {
         } else if (error) {
             this.quote = undefined;
             this.error = error;
-        } else {
             const evt = new ShowToastEvent({ title: 'Please Do not reload the page without saving', message: 'Open the Ui from the button in the record page',
             variant: 'error', mode: 'dismissable' });
             this.dispatchEvent(evt);
-        }
+        } 
     }
     //GET ACCOUNT ASSOCIATED TO QUOTE
     @wire(getRecord, { recordId: '$accId', fields: [ACC_NAME_FIELD]})
